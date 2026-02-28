@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Cajero{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Panel del Cajero</h1>
+    
+    <div class="alert alert-success text-center mb-5" role="alert">
+        <h4 class="alert-heading">¡Bienvenido, {{ user.username }}!</h4>
+        <p>Estás en modo Cajero. Aquí puedes confirmar pagos y procesar ventas de boletos.</p>
+    </div>
+
+    <!-- Tarjetas de acciones rápidas -->
+    <div class="row g-4">
+        <!-- Confirmar reservas pendientes -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow h-100 border-primary">
+                <div class="card-body text-center">
+                    <i class="bi bi-clock-history display-4 text-primary mb-3"></i>
+                    <h5 class="card-title">Reservas Pendientes</h5>
+                    <p class="card-text">Revisa y confirma pagos de asientos reservados temporalmente.</p>
+                    <a href="{% url 'pending_reservations' %}" class="btn btn-primary btn-lg w-100">
+                        Ver Reservas Pendientes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Venta rápida de boletos -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow h-100 border-success">
+                <div class="card-body text-center">
+                    <i class="bi bi-ticket-perforated display-4 text-success mb-3"></i>
+                    <h5 class="card-title">Venta Rápida</h5>
+                    <p class="card-text">Busca una función y vende boletos directamente en taquilla.</p>
+                    <a href="{% url 'movie_list' %}" class="btn btn-success btn-lg w-100">
+                        Ir a Cartelera
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte del día (placeholder) -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow h-100 border-info">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up display-4 text-info mb-3"></i>
+                    <h5 class="card-title">Reporte del Día</h5>
+                    <p class="card-text">Ventas realizadas hoy (próximamente).</p>
+                    <button class="btn btn-info btn-lg w-100 disabled">Ver Reporte (próximo)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Espacio para futuras secciones -->
+    <div class="mt-5">
+        <h4 class="text-center mb-4 text-muted">Otras acciones</h4>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <button class="btn btn-outline-secondary btn-lg px-4" disabled>Cerrar Día</button>
+            <button class="btn btn-outline-secondary btn-lg px-4" disabled>Ver Historial de Ventas</button>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Icons (agrega esto en base.html si no lo tienes) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}

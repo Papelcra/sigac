@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket SIGAC - {{ ticket.uuid }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        .header { background: #198754; color: white; text-align: center; padding: 20px; border-radius: 10px 10px 0 0; }
+        .content { padding: 20px; text-align: center; }
+        .qr { max-width: 200px; margin: 20px auto; display: block; }
+        .footer { text-align: center; margin-top: 30px; font-size: 0.9em; color: #666; }
+        table { width: 100%; margin: 20px 0; border-collapse: collapse; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+        .label { font-weight: bold; width: 40%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>¡Compra Confirmada!</h2>
+            <p>Muestra este ticket (o QR) en la entrada</p>
+        </div>
+
+        <div class="content">
+            <h3>{{ ticket.movie_title }}</h3>
+            
+            <table>
+                <tr><td class="label">Sala / Asiento:</td><td>{{ ticket.seat_info }}</td></tr>
+                <tr><td class="label">Fecha / Hora:</td><td>{{ ticket.show_seat.show.date|date:"d/m/Y" }} - {{ ticket.show_seat.show.time|time:"H:i" }}</td></tr>
+                <tr><td class="label">Precio:</td><td>${{ ticket.price|floatformat:2 }}</td></tr>
+                <tr><td class="label">Comprado el:</td><td>{{ ticket.purchase_date|date:"d/m/Y H:i" }}</td></tr>
+                <tr><td class="label">Ticket ID:</td><td>{{ ticket.uuid }}</td></tr>
+            </table>
+
+            {% if ticket.qr_code %}
+                <img src="{{ ticket.qr_code.url }}" alt="Código QR" class="qr">
+                <p>Escanea este QR en la entrada</p>
+            {% else %}
+                <p class="text-danger">QR no disponible</p>
+            {% endif %}
+        </div>
+
+        <div class="footer">
+            <p>SIGAC - Sistema de Gestión de Cine © 2026</p>
+            <p>¡Disfruta la película!</p>
+        </div>
+    </div>
+</body>
+</html>

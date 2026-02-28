@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Cartelera - SIGAC{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-5">Cartelera Actual</h1>
+
+    {% if shows %}
+        <div class="row">
+            {% for show in shows %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        {% if show.movie.poster %}
+                            <img src="{{ show.movie.poster.url }}" class="card-img-top" alt="{{ show.movie.title }}" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 250px;">
+                                Sin póster
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ show.movie.title }}</h5>
+                            <p class="card-text">
+                                <strong>Sala:</strong> {{ show.room.name }}<br>
+                                <strong>Fecha:</strong> {{ show.date }}<br>
+                                <strong>Hora:</strong> {{ show.time|time:"H:i" }}<br>
+                                <strong>Precio:</strong> ${{ show.base_price }}
+                            </p>
+                            <a href="{% url 'seat_selection' show.id %}" class="btn btn-primary w-100">
+                                Seleccionar Asientos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            <h4>No hay funciones disponibles en este momento</h4>
+            <p>Revisa más tarde o contacta al cine.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

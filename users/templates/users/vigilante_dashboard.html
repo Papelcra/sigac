@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Vigilante{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Panel del Vigilante</h1>
+
+    <div class="alert alert-warning text-center mb-5" role="alert">
+        <h4 class="alert-heading">¡Bienvenido, {{ user.username }}!</h4>
+        <p>Estás en modo Vigilante. Aquí puedes validar entradas y controlar accesos a las salas.</p>
+    </div>
+
+    <!-- Acciones principales -->
+    <div class="row g-4 mb-5">
+        <!-- Validar entrada (principal) -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow h-100 border-warning">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <i class="bi bi-qr-code-scan display-4 text-warning mb-3"></i>
+                    <h5 class="card-title">Validar Entrada</h5>
+                    <p class="card-text mb-4">Escanea o ingresa el código del ticket para permitir el acceso.</p>
+                    <a href="{% url 'validate_ticket' %}" class="btn btn-warning btn-lg w-100 mt-auto">
+                        <i class="bi bi-qr-code me-2"></i> Validar Ahora
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Funciones del día -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow h-100 border-info">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <i class="bi bi-calendar-event display-4 text-info mb-3"></i>
+                    <h5 class="card-title">Funciones de Hoy</h5>
+                    <p class="card-text mb-4">Revisa las funciones activas y sus salas.</p>
+                    <a href="{% url 'movie_list' %}" class="btn btn-info btn-lg w-100 mt-auto">
+                        <i class="bi bi-film me-2"></i> Ver Cartelera Actual
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte del día (placeholder) -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow h-100 border-secondary">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <i class="bi bi-clipboard-check display-4 text-secondary mb-3"></i>
+                    <h5 class="card-title">Entradas Validadas Hoy</h5>
+                    <p class="card-text mb-4">Próximamente: conteo y detalle de accesos.</p>
+                    <button class="btn btn-secondary btn-lg w-100 mt-auto disabled">
+                        Ver Reporte (en desarrollo)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensaje motivador o info adicional -->
+    <div class="text-center mt-4">
+        <p class="text-muted">
+            Recuerda: solo valida tickets con estado <strong>Pagado</strong> y función activa.<br>
+            Si el ticket está usado o inválido, informa al cliente.
+        </p>
+    </div>
+</div>
+
+<!-- Bootstrap Icons (agrega en base.html si no lo tienes) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}

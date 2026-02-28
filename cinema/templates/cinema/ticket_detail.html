@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Ticket - {{ ticket.uuid }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-5">Tu Ticket de Entrada</h1>
+
+    <div class="card mx-auto shadow-lg" style="max-width: 600px;">
+        <div class="card-header bg-success text-white text-center py-4">
+            <h4>¡Compra Confirmada!</h4>
+            <small>Muestra este código QR en la entrada</small>
+        </div>
+        <div class="card-body text-center">
+            <h5 class="mb-4">{{ ticket.show_seat.show.movie.title }}</h5>
+            
+            <div class="mb-3">
+                <strong>Sala / Asiento:</strong><br>
+                {{ ticket.seat_info }}
+            </div>
+            
+            <div class="mb-3">
+                <strong>Fecha / Hora:</strong><br>
+                {{ ticket.show_seat.show.date|date:"d/m/Y" }} - {{ ticket.show_seat.show.time|time:"H:i" }}
+            </div>
+            
+            <div class="mb-4">
+                <strong>Precio:</strong> ${{ ticket.price|floatformat:2 }}<br>
+                <small>Comprado el {{ ticket.purchase_date|date:"d/m/Y H:i" }}</small>
+            </div>
+
+            {% if ticket.qr_code %}
+                <div class="mb-4">
+                    <img src="{{ ticket.qr_code.url }}" alt="Código QR" class="img-fluid rounded shadow" style="max-width: 250px;">
+                </div>
+                <p class="text-muted small">Escanea este QR en la entrada de la sala</p>
+            {% else %}
+                <p class="text-warning">QR no disponible. Contacta al soporte.</p>
+            {% endif %}
+
+            <p class="text-muted small mt-4">
+                Ticket ID: {{ ticket.uuid }}<br>
+                Estado: <strong>{{ ticket.status|capfirst }}</strong>
+            </p>
+        </div>
+        <div class="card-footer text-center bg-light">
+            <a href="{% url 'download_ticket_pdf' ticket.id %}" class="btn btn-primary btn-lg px-5">
+                Descargar PDF
+            </a>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'cliente_dashboard' %}" class="btn btn-outline-secondary">
+            Volver a mi cuenta
+        </a>
+    </div>
+</div>
+{% endblock %}

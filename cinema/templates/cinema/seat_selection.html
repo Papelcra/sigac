@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Seleccionar Asientos - {{ show.movie.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <h1 class="text-center mb-4">Selecciona tus asientos</h1>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Info de la función -->
+    <div class="card shadow-lg mb-5 border-0">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h3 class="card-title mb-3 text-primary">{{ show.movie.title }}</h3>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><i class="bi bi-building me-2"></i><strong>Sala:</strong> {{ show.room.name }}</li>
+                        <li class="mb-2"><i class="bi bi-calendar-event me-2"></i><strong>Fecha:</strong> {{ show.date|date:"d \d\e F \d\e Y" }}</li>
+                        <li class="mb-2"><i class="bi bi-clock me-2"></i><strong>Hora:</strong> {{ show.time|time:"H:i" }}</li>
+                        <li><i class="bi bi-currency-dollar me-2"></i><strong>Precio por asiento:</strong> 
+                            {% if show.base_price > 0 %}
+                                <span class="fw-bold text-success">${{ show.base_price|floatformat:2 }}</span>
+                            {% else %}
+                                <span class="fw-bold text-muted">Gratis</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+                {% if show.movie.poster %}
+                    <div class="col-md-4 text-center mt-3 mt-md-0">
+                        <img src="{{ show.movie.poster.url }}" alt="{{ show.movie.title }}" class="img-fluid rounded shadow" style="max-height: 240px; object-fit: cover;">
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla -->
+    <div class="text-center mb-5">
+        <div class="bg-dark text-white py-4 rounded shadow mx-auto fw-bold" style="width: 85%; max-width: 700px; font-size: 1.6rem; letter-spacing: 2px;">
+            PANTALLA
+        </div>
+    </div>
+
+    <!-- Contador -->
+    <div class="text-center mb-4">
+        <p class="lead text-muted">Selecciona los asientos disponibles (verdes)</p>
+        <div class="d-flex justify-content-center gap-4 gap-md-5 mb-3 flex-wrap">
+            <div class="badge bg-light text-dark fs-5 px-4 py-2">
+                Asientos seleccionados: <span id="selected-count" class="fw-bold">0</span>
+            </div>
+            <div class="badge bg-light text-dark fs-5 px-4 py-2">
+                Total a pagar: $<span id="total-price" class="fw-bold">0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario -->
+    <form method="post" action="{% url 'reserve_seats' show.id %}" id="seat-form">
+        {% csrf_token %}
+
+        {% if seats_by_row %}
+            <div class="text-center mb-5">
+                {% for row, seats in seats_by_row %}
+                    <div class="mb-5">
+                        <strong class="d-block mb-3 fs-4 text-secondary">Fila {{ row }}</strong>
+                        <div class="d-flex justify-content-center flex-wrap gap-2 gap-md-3">
+                            {% for show_seat in seats %}
+                                <div class="text-center position-relative">
+                                    {% if show_seat.status == 'disponible' %}
+                                        <input type="checkbox" 
+                                               name="selected_seats" 
+                                               value="{{ show_seat.id }}"
+                                               id="seat-{{ show_seat.id }}"
+                                               class="seat-checkbox d-none"
+                                               data-price="{{ show.base_price|default:0 }}">
+                                        <label for="seat-{{ show_seat.id }}"
+                                               class="seat-button btn btn-success d-flex align-items-center justify-content-center">
+                                            {{ show_seat.seat.number }}
+                                        </label>
+                                    {% elif show_seat.status == 'reservado' %}
+                                        <span class="seat-button btn btn-warning disabled position-relative">
+                                            {{ show_seat.seat.number }}
+                                            <small class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">R</small>
+                                        </span>
+                                    {% else %}
+                                        <span class="seat-button btn btn-danger disabled">
+                                            {{ show_seat.seat.number }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-warning text-center py-4">
+                <h4 class="mb-3">¡Ups! No hay asientos disponibles para esta función</h4>
+                <p>Es posible que aún no se hayan generado. Intenta editar y guardar la función en el panel de administración.</p>
+                <a href="{% url 'movie_list' %}" class="btn btn-outline-primary mt-2">Volver a la cartelera</a>
+            </div>
+        {% endif %}
+
+        <div class="text-center mt-5">
+            <a href="{% url 'movie_list' %}" class="btn btn-outline-secondary btn-lg me-3 px-4">
+                Volver a cartelera
+            </a>
+            <button type="button" id="clear-selection" class="btn btn-outline-secondary btn-lg me-3 px-4">
+                Limpiar selección
+            </button>
+            <button type="button" class="btn btn-primary btn-lg px-5" data-bs-toggle="modal" data-bs-target="#confirmModal" {% if not seats_by_row %}disabled{% endif %}>
+                Reservar seleccionados
+            </button>
+        </div>
+
+        <!-- Modal de confirmación -->
+        <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="confirmModalLabel">Confirmar tu reserva</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <h5>Vas a reservar <strong><span id="modal-selected-count">0</span> asiento(s)</strong></h5>
+                        <p class="fs-5 mb-4">Total aproximado: <strong>$<span id="modal-total-price">0.00</span></strong></p>
+                        <p class="text-muted small">
+                            Los asientos quedarán reservados por <strong>10 minutos</strong>.<br>
+                            Completa la compra antes de que expire el tiempo.
+                        </p>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-lg btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-lg btn-primary px-5">Sí, reservar ahora</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Leyenda -->
+    <div class="mt-5 text-center">
+        <h5>Leyenda de colores</h5>
+        <div class="d-flex justify-content-center gap-4 flex-wrap mt-3">
+            <span class="badge bg-success px-4 py-2 fs-6">Disponible</span>
+            <span class="badge bg-warning px-4 py-2 fs-6">Reservado temporalmente</span>
+            <span class="badge bg-danger px-4 py-2 fs-6">Vendido</span>
+            <span class="badge bg-primary px-4 py-2 fs-6">Seleccionado</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    .seat-button {
+        width: 55px;
+        height: 55px;
+        font-size: 15px;
+        padding: 0;
+        line-height: 55px;
+        border-radius: 10px;
+        transition: all 0.25s ease;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .seat-checkbox:checked + .seat-button {
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
+        color: white;
+        transform: scale(1.2);
+        box-shadow: 0 0 15px rgba(13, 110, 253, 0.6);
+    }
+
+    .seat-button:hover:not(.disabled) {
+        transform: scale(1.15);
+    }
+
+    @media (max-width: 768px) {
+        .seat-button {
+            width: 48px;
+            height: 48px;
+            font-size: 13px;
+            line-height: 48px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkboxes = document.querySelectorAll('.seat-checkbox');
+        const countElement = document.getElementById('selected-count');
+        const totalElement = document.getElementById('total-price');
+        const modalCount = document.getElementById('modal-selected-count');
+        const modalTotal = document.getElementById('modal-total-price');
+        const clearButton = document.getElementById('clear-selection');
+        const pricePerSeat = {{ show.base_price|default:0|floatformat:2 }};
+
+        function updateSummary() {
+            const selected = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const total = selected * pricePerSeat;
+            countElement.textContent = selected;
+            totalElement.textContent = total.toFixed(2);
+            if (modalCount) modalCount.textContent = selected;
+            if (modalTotal) modalTotal.textContent = total.toFixed(2);
+        }
+
+        checkboxes.forEach(checkbox => checkbox.addEventListener('change', updateSummary));
+        if (clearButton) clearButton.addEventListener('click', () => {
+            checkboxes.forEach(cb => cb.checked = false);
+            updateSummary();
+        });
+
+        const confirmModal = document.getElementById('confirmModal');
+        if (confirmModal) {
+            confirmModal.addEventListener('show.bs.modal', updateSummary);
+        }
+
+        updateSummary();
+    });
+</script>
+{% endblock %}

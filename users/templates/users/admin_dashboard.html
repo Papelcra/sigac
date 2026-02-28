@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Administrador{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Panel de Administrador</h1>
+    <div class="alert alert-info">
+        <p>Bienvenido, {{ user.username }} (Rol: {{ user.role }})</p>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Gestión de Películas</h5>
+                    <p>Agregar, editar o desactivar películas.</p>
+                    <!-- <a href="#" class="btn btn-primary">Ir</a> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Salas y Funciones</h5>
+                    <p>Configurar salas y programar shows.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Usuarios</h5>
+                    <p>Administrar cuentas y roles.</p>
+                    <a href="{% url 'admin:index' %}" class="btn btn-success">Ir al Admin</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

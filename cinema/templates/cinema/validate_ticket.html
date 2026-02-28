@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Validar Entrada - Vigilante{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Validar Entrada</h1>
+
+    <div class="card shadow mx-auto" style="max-width: 600px;">
+        <div class="card-body">
+            <h5 class="card-title text-center mb-4">Ingresa el código del ticket</h5>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="input-group input-group-lg mb-4">
+                    <input type="text" name="uuid" class="form-control" placeholder="Ej: 74e8fe38-c8ad-41f8-b651-a9d01eee9526" required autofocus>
+                    <button class="btn btn-primary" type="submit">Validar</button>
+                </div>
+            </form>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if success_ticket %}
+                <div class="alert alert-success text-center mt-4">
+                    <h4>¡Entrada válida!</h4>
+                    <p>{{ success_ticket.movie_title }}</p>
+                    <p><strong>Asiento:</strong> {{ success_ticket.seat_info }}</p>
+                    <p><strong>Función:</strong> {{ success_ticket.show_seat.show.date|date:"d/m/Y" }} {{ success_ticket.show_seat.show.time|time:"H:i" }}</p>
+                    <p><strong>Ticket ID:</strong> {{ success_ticket.uuid }}</p>
+                </div>
+            {% endif %}
+
+            {% if ticket and not success_ticket %}
+                <div class="alert alert-info mt-4">
+                    <h5>Información del ticket</h5>
+                    <p><strong>Película:</strong> {{ ticket.movie_title }}</p>
+                    <p><strong>Asiento:</strong> {{ ticket.seat_info }}</p>
+                    <p><strong>Estado:</strong> {{ ticket.status|capfirst }}</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'vigilante_dashboard' %}" class="btn btn-outline-secondary">Volver al dashboard</a>
+    </div>
+</div>
+{% endblock %}
