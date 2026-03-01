@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{{ titulo }}</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Película</label>
+                    {{ form.movie }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Sala</label>
+                    {{ form.room }}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Fecha</label>
+                    {{ form.date }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Hora</label>
+                    {{ form.time }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Precio base</label>
+                    {{ form.base_price }}
+                </div>
+
+                <div class="mb-3 form-check">
+                    {{ form.active }}
+                    <label class="form-check-label" for="{{ form.active.id_for_label }}">Función activa (visible en cartelera)</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 text-end">
+            <a href="{% url 'admin_funciones' %}" class="btn btn-secondary me-3">Cancelar</a>
+            <button type="submit" class="btn btn-primary btn-lg px-5">Guardar Función</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

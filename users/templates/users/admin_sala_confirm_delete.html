@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Sala{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>¿Eliminar sala?</h1>
+    <div class="alert alert-danger">
+        <p>Estás a punto de eliminar la sala:</p>
+        <ul>
+            <li><strong>Nombre:</strong> {{ sala.name }}</li>
+            <li><strong>Capacidad:</strong> {{ sala.capacity }} personas</li>
+            <li><strong>Asientos generados:</strong> {{ sala.seats.count }}</li>
+            <li><strong>Funciones asociadas:</strong> {{ sala.shows.count }}</li>
+        </ul>
+        {% if sala.shows.exists %}
+            <p class="fw-bold">¡Advertencia! Esta sala tiene funciones programadas. No se recomienda eliminarla.</p>
+        {% endif %}
+        <p>Esta acción no se puede deshacer. ¿Estás seguro?</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-lg">Sí, eliminar</button>
+        <a href="{% url 'admin_salas' %}" class="btn btn-secondary btn-lg">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

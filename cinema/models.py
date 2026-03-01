@@ -198,3 +198,19 @@ class Ticket(models.Model):
 
     class Meta:
         ordering = ['-purchase_date']
+
+
+class TurnoCaja(models.Model):
+    cajero = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True)
+    fecha_inicio = models.DateTimeField(auto_now_add=True)
+    fecha_fin = models.DateTimeField(null=True, blank=True)
+    total_ventas = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    boletos_vendidos = models.PositiveIntegerField(default=0)
+    notas = models.TextField(blank=True)
+    cerrado = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Turno de {self.cajero} - {self.fecha_inicio.date()}"
+
+    class Meta:
+        ordering = ['-fecha_inicio']

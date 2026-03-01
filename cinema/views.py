@@ -3,11 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib import messages
-from .models import Show, ShowSeat, Ticket
+from .models import Show, ShowSeat, Ticket, TurnoCaja
 from django.template.loader import render_to_string
 import os
 from weasyprint import HTML
 from django.http import HttpResponse
+from django.db.models import Sum
 
 
 def clear_expired_reservations():
@@ -251,3 +252,55 @@ def validate_ticket(request):
 
     context['ticket'] = ticket
     return render(request, 'cinema/validate_ticket.html', context)
+
+@login_required
+def cierre_caja(request):
+    if request.user.role != 'cajero':
+        messages.error(request, "Acceso solo para cajeros.")
+        return redirect('home')
+
+    # Ventas del día actual (puedes ajustar a turno)
+    today = timezone.now().date()
+    boletos_hoy = Ticket.objects.filter(
+        purchase_date__date=today,
+        status='paid'
+    ).select_related('show_seat__show')
+
+    total_ingresos = boletos_hoy.aggregate(total=Sum('price'))['total'] or 0
+    num_boletos = boletos_hoy.count()
+
+    # Último turno abierto del cajero (si existe)
+    turno_abierto = TurnoCaja.objects.filter(
+        cajero=request.user,
+        cerrado=False
+    ).order_by('-fecha_inicio').first()
+
+    if request.method == 'POST':
+        if 'cerrar' in request.POST:
+            if turno_abierto:
+                turno_abierto.fecha_fin = timezone.now()
+                turno_abierto.total_ventas = total_ingresos
+                turno_abierto.boletos_vendidos = num_boletos
+                turno_abierto.notas = request.POST.get('notas', '')
+                turno_abierto.cerrado = True
+                turno_abierto.save()
+                messages.success(request, f"Turno cerrado correctamente. Total: ${total_ingresos:,.2f}")
+            else:
+                # Crear nuevo turno si no había
+                TurnoCaja.objects.create(
+                    cajero=request.user,
+                    total_ventas=total_ingresos,
+                    boletos_vendidos=num_boletos,
+                    notas=request.POST.get('notas', ''),
+                    cerrado=True
+                )
+                messages.success(request, "Cierre de caja realizado (sin turno previo abierto).")
+            return redirect('cajero_dashboard')
+
+    context = {
+        'total_ingresos': total_ingresos,
+        'num_boletos': num_boletos,
+        'turno_abierto': turno_abierto,
+        'boletos_hoy': boletos_hoy,
+    }
+    return render(request, 'cinema/cierre_caja.html', context)

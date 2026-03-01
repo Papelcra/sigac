@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin - Salas{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Salas del Cine</h1>
+        <a href="{% url 'admin_sala_crear' %}" class="btn btn-success btn-lg">
+            <i class="bi bi-plus-circle me-2"></i> Crear Nueva Sala
+        </a>
+    </div>
+
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if salas %}
+        <div class="row g-4">
+            {% for sala in salas %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ sala.name }}</h5>
+                            <p class="card-text">
+                                <strong>Capacidad:</strong> {{ sala.capacity }} personas<br>
+                                <strong>Asientos generados:</strong> {{ sala.seats.count }}<br>
+                                <strong>Funciones asociadas:</strong> {{ sala.shows.count }}
+                            </p>
+                            <div class="d-flex gap-2 mt-3">
+                                <a href="{% url 'admin_sala_editar' sala.id %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </a>
+                                <a href="{% url 'admin_sala_eliminar' sala.id %}" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center py-5">
+            <i class="bi bi-building display-1 text-muted mb-3 d-block"></i>
+            <h5>Aún no hay salas creadas</h5>
+            <p>Crea una sala para empezar a programar funciones.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

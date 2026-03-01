@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{{ titulo }}</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nombre de la sala</label>
+                    <input type="text" name="name" class="form-control form-control-lg" 
+                           value="{{ sala.name|default:'' }}" required placeholder="Ej: Sala 1">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Capacidad total (personas)</label>
+                    <input type="number" name="capacity" class="form-control form-control-lg" min="1" 
+                           value="{{ sala.capacity|default:'' }}" required placeholder="Ej: 100">
+                    <small class="text-muted">Los asientos se generarán automáticamente al guardar.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 text-end">
+            <a href="{% url 'admin_salas' %}" class="btn btn-secondary me-3">Cancelar</a>
+            <button type="submit" class="btn btn-primary btn-lg px-5">Guardar Sala</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

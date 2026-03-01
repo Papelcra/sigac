@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Usuario{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>¿Eliminar usuario?</h1>
+    <div class="alert alert-danger">
+        <p>Estás a punto de eliminar el usuario:</p>
+        <ul>
+            <li><strong>Usuario:</strong> {{ usuario.username }}</li>
+            <li><strong>Email:</strong> {{ usuario.email|default:"-" }}</li>
+            <li><strong>Rol:</strong> {{ usuario.role|capfirst }}</li>
+            <li><strong>Activo:</strong> {% if usuario.is_active %}Sí{% else %}No{% endif %}</li>
+        </ul>
+        <p class="fw-bold">¡Advertencia! Esta acción no se puede deshacer y el usuario perderá acceso inmediato.</p>
+        <p>¿Estás seguro?</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-lg">Sí, eliminar</button>
+        <a href="{% url 'admin_usuarios' %}" class="btn btn-secondary btn-lg">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

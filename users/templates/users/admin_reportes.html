@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes - Administrador{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-5 fw-bold text-dark">Reportes Financieros</h1>
+
+    <!-- Resumen rápido -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card shadow border-primary h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold">Hoy ({{ today|date:"d/m/Y" }})</h5>
+                    <h3 class="text-primary fw-bold">${{ total_dia|floatformat:2 }}</h3>
+                    <p class="text-muted">{{ boletos_dia }} boletos vendidos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow border-success h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold">Esta semana</h5>
+                    <h3 class="text-success fw-bold">${{ total_semana|floatformat:2 }}</h3>
+                    <p class="text-muted">Ingresos acumulados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow border-info h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold">Este mes</h5>
+                    <h3 class="text-info fw-bold">${{ total_mes|floatformat:2 }}</h3>
+                    <p class="text-muted">Ingresos acumulados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top cajeros -->
+    <div class="card shadow mb-5">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0 fw-bold">Top 5 Cajeros (ventas totales)</h5>
+        </div>
+        <div class="card-body">
+            {% if por_cajero %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Cajero</th>
+                                <th>Boletos vendidos</th>
+                                <th>Total ventas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cajero in por_cajero %}
+                                <tr>
+                                    <td>{{ cajero.user__username|default:"-" }}</td>
+                                    <td>{{ cajero.boletos }}</td>
+                                    <td>${{ cajero.total|floatformat:2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted text-center py-4">Aún no hay ventas registradas.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Top películas -->
+    <div class="card shadow mb-5">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0 fw-bold">Top 5 Películas más vendidas</h5>
+        </div>
+        <div class="card-body">
+            {% if top_peliculas %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Película</th>
+                                <th>Boletos vendidos</th>
+                                <th>Ingresos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for peli in top_peliculas %}
+                                <tr>
+                                    <td>{{ peli.show_seat__show__movie__title }}</td>
+                                    <td>{{ peli.boletos }}</td>
+                                    <td>${{ peli.ingresos|floatformat:2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted text-center py-4">Aún no hay ventas por película.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Botón exportar (AHORA FUNCIONAL) -->
+    <div class="text-center mt-5">
+    <a href="{% url 'export_reportes_pdf' %}" class="btn btn-danger btn-lg px-5 py-3">
+        <i class="bi bi-file-earmark-pdf me-2"></i> Exportar como PDF
+    </a>
+    
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+            Volver al Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

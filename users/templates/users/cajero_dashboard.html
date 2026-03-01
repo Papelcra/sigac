@@ -11,16 +11,37 @@
         <p>Estás en modo Cajero. Aquí puedes confirmar pagos y procesar ventas de boletos.</p>
     </div>
 
+    <!-- Resumen rápido del día -->
+    <div class="card shadow mb-5 bg-light">
+        <div class="card-body text-center">
+            <h5 class="card-title">Resumen del día ({{ today|date:"d/m/Y" }})</h5>
+            <div class="row mt-3">
+                <div class="col-md-4">
+                    <h3 class="text-success">{{ boletos_hoy|default:0 }}</h3>
+                    <p class="text-muted">Boletos vendidos hoy</p>
+                </div>
+                <div class="col-md-4">
+                    <h3 class="text-primary">${{ total_hoy|default:"0.00"|floatformat:2 }}</h3>
+                    <p class="text-muted">Ingresos totales hoy</p>
+                </div>
+                <div class="col-md-4">
+                    <h3 class="text-warning">{{ reservas_pendientes|default:0 }}</h3>
+                    <p class="text-muted">Reservas pendientes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Tarjetas de acciones rápidas -->
     <div class="row g-4">
         <!-- Confirmar reservas pendientes -->
         <div class="col-md-6 col-lg-4">
             <div class="card shadow h-100 border-primary">
-                <div class="card-body text-center">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
                     <i class="bi bi-clock-history display-4 text-primary mb-3"></i>
                     <h5 class="card-title">Reservas Pendientes</h5>
                     <p class="card-text">Revisa y confirma pagos de asientos reservados temporalmente.</p>
-                    <a href="{% url 'pending_reservations' %}" class="btn btn-primary btn-lg w-100">
+                    <a href="{% url 'pending_reservations' %}" class="btn btn-primary btn-lg w-100 mt-auto">
                         Ver Reservas Pendientes
                     </a>
                 </div>
@@ -30,25 +51,27 @@
         <!-- Venta rápida de boletos -->
         <div class="col-md-6 col-lg-4">
             <div class="card shadow h-100 border-success">
-                <div class="card-body text-center">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
                     <i class="bi bi-ticket-perforated display-4 text-success mb-3"></i>
                     <h5 class="card-title">Venta Rápida</h5>
                     <p class="card-text">Busca una función y vende boletos directamente en taquilla.</p>
-                    <a href="{% url 'movie_list' %}" class="btn btn-success btn-lg w-100">
+                    <a href="{% url 'movie_list' %}" class="btn btn-success btn-lg w-100 mt-auto">
                         Ir a Cartelera
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Reporte del día (placeholder) -->
+        <!-- Cierre de caja -->
         <div class="col-md-6 col-lg-4">
-            <div class="card shadow h-100 border-info">
-                <div class="card-body text-center">
-                    <i class="bi bi-graph-up display-4 text-info mb-3"></i>
-                    <h5 class="card-title">Reporte del Día</h5>
-                    <p class="card-text">Ventas realizadas hoy (próximamente).</p>
-                    <button class="btn btn-info btn-lg w-100 disabled">Ver Reporte (próximo)</button>
+            <div class="card shadow h-100 border-danger">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <i class="bi bi-cash-stack display-4 text-danger mb-3"></i>
+                    <h5 class="card-title">Cierre de Caja</h5>
+                    <p class="card-text">Registra el corte de turno y genera reporte del día.</p>
+                    <a href="{% url 'cierre_caja' %}" class="btn btn-danger btn-lg w-100 mt-auto">
+                        Cerrar Caja Ahora
+                    </a>
                 </div>
             </div>
         </div>
@@ -58,12 +81,11 @@
     <div class="mt-5">
         <h4 class="text-center mb-4 text-muted">Otras acciones</h4>
         <div class="d-flex justify-content-center gap-3 flex-wrap">
-            <button class="btn btn-outline-secondary btn-lg px-4" disabled>Cerrar Día</button>
             <button class="btn btn-outline-secondary btn-lg px-4" disabled>Ver Historial de Ventas</button>
+            <button class="btn btn-outline-secondary btn-lg px-4" disabled>Imprimir Reporte</button>
         </div>
     </div>
 </div>
 
-<!-- Bootstrap Icons (agrega esto en base.html si no lo tienes) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 {% endblock %}

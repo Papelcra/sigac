@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Función{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>¿Eliminar función?</h1>
+    <div class="alert alert-danger">
+        <p>Estás a punto de eliminar la función:</p>
+        <ul>
+            <li><strong>Película:</strong> {{ funcion.movie.title }}</li>
+            <li><strong>Sala:</strong> {{ funcion.room.name }}</li>
+            <li><strong>Fecha/Hora:</strong> {{ funcion.date|date:"d/m/Y" }} {{ funcion.time|time:"H:i" }}</li>
+            <li><strong>Precio:</strong> ${{ funcion.base_price|floatformat:2 }}</li>
+        </ul>
+        <p>Esta acción no se puede deshacer. ¿Estás seguro?</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-lg">Sí, eliminar</button>
+        <a href="{% url 'admin_funciones' %}" class="btn btn-secondary btn-lg">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

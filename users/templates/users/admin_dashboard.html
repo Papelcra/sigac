@@ -4,38 +4,141 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center mb-4">Panel de Administrador</h1>
-    <div class="alert alert-info">
-        <p>Bienvenido, {{ user.username }} (Rol: {{ user.role }})</p>
+    <h1 class="text-center mb-5 fw-bold text-primary">Panel de Administración</h1>
+
+    <div class="alert alert-primary text-center mb-5 shadow-sm" role="alert">
+        <h4 class="alert-heading">¡Bienvenido, {{ user.username }}!</h4>
+        <p class="lead">Desde aquí controlas todo el cine: películas, funciones, salas, usuarios y reportes financieros.</p>
     </div>
-    
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Gestión de Películas</h5>
-                    <p>Agregar, editar o desactivar películas.</p>
-                    <!-- <a href="#" class="btn btn-primary">Ir</a> -->
+
+    <!-- Resumen rápido (datos reales) -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card shadow border-primary h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-film display-4 text-primary mb-3"></i>
+                    <h3 class="card-title">{{ total_peliculas|default:0 }}</h3>
+                    <p class="card-text">Películas registradas</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Salas y Funciones</h5>
-                    <p>Configurar salas y programar shows.</p>
+        <div class="col-md-3">
+            <div class="card shadow border-success h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-event display-4 text-success mb-3"></i>
+                    <h3 class="card-title">{{ funciones_hoy|default:0 }}</h3>
+                    <p class="card-text">Funciones hoy</p>
                 </div>
             </div>
         </div>
+        <div class="col-md-3">
+            <div class="card shadow border-info h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-building display-4 text-info mb-3"></i>
+                    <h3 class="card-title">{{ salas|length|default:0 }}</h3>
+                    <p class="card-text">Salas activas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow border-danger h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-currency-dollar display-4 text-danger mb-3"></i>
+                    <h3 class="card-title">${{ ventas_dia|default:"0.00"|floatformat:2 }}</h3>
+                    <p class="card-text">Ventas del día</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de acciones rápidas -->
+    <div class="row g-4">
+        <!-- Películas -->
         <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Usuarios</h5>
-                    <p>Administrar cuentas y roles.</p>
-                    <a href="{% url 'admin:index' %}" class="btn btn-success">Ir al Admin</a>
+            <div class="card shadow h-100 border-primary">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <i class="bi bi-film display-4 text-primary mb-3"></i>
+                    <h5 class="card-title">Películas</h5>
+                    <p class="card-text">Gestiona el catálogo con póster, duración y estreno.</p>
+                    <a href="{% url 'admin_peliculas' %}" class="btn btn-primary btn-lg w-100 mt-auto">
+                        Gestionar Películas
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Funciones -->
+        <div class="col-md-4">
+            <div class="card shadow h-100 border-success">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <i class="bi bi-calendar-event display-4 text-success mb-3"></i>
+                    <h5 class="card-title">Funciones</h5>
+                    <p class="card-text">Programa proyecciones: película, sala, fecha, hora y precio.</p>
+                    <a href="{% url 'admin_funciones' %}" class="btn btn-success btn-lg w-100 mt-auto">
+                        Programar Funciones
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salas -->
+        <div class="col-md-4">
+            <div class="card shadow h-100 border-info">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <i class="bi bi-building display-4 text-info mb-3"></i>
+                    <h5 class="card-title">Salas</h5>
+                    <p class="card-text">Configura salas, capacidad y asientos automáticos.</p>
+                    <a href="{% url 'admin_salas' %}" class="btn btn-info btn-lg w-100 mt-auto">
+                        Gestionar Salas
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usuarios y Roles -->
+        <div class="col-md-4">
+            <div class="card shadow h-100 border-warning">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <i class="bi bi-people display-4 text-warning mb-3"></i>
+                    <h5 class="card-title">Usuarios y Roles</h5>
+                    <p class="card-text">Crea cuentas y asigna roles al equipo (cajero, vigilante, etc.).</p>
+                    <a href="{% url 'admin_usuarios' %}" class="btn btn-warning btn-lg w-100 mt-auto">
+                        Gestionar Usuarios
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reportes Financieros -->
+        <div class="col-md-4">
+            <div class="card shadow h-100 border-dark">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <i class="bi bi-graph-up-arrow display-4 text-dark mb-3"></i>
+                    <h5 class="card-title">Reportes Financieros</h5>
+                    <p class="card-text">Ventas, ingresos, top películas y más.</p>
+                    <a href="{% url 'admin_reportes' %}" class="btn btn-dark btn-lg w-100 mt-auto">
+                        Ver Reportes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cierre de Caja (opcional, si el admin también lo necesita) -->
+        <div class="col-md-4">
+            <div class="card shadow h-100 border-danger">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <i class="bi bi-cash-stack display-4 text-danger mb-3"></i>
+                    <h5 class="card-title">Cierre de Caja</h5>
+                    <p class="card-text">Revisa y cierra turnos de cajeros (opcional).</p>
+                    <a href="{% url 'cierre_caja' %}" class="btn btn-danger btn-lg w-100 mt-auto">
+                        Ver Cierres
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 {% endblock %}
