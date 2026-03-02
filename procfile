@@ -1,0 +1,1 @@
+web: gunicorn sigac.wsgi --log-file -
