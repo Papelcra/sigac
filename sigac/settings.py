@@ -27,6 +27,9 @@ ALLOWED_HOSTS = ['*']  # Temporal para pruebas en Render; después pon tu domini
 # Application definition
 
 INSTALLED_APPS = [
+
+    'users',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -34,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'users',
+ 
     'cinema',
     'sales',
     'inventory',
