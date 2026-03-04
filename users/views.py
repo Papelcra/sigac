@@ -7,7 +7,14 @@ from django.utils import timezone
 from django.db.models import Sum, Count
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from weasyprint import HTML
+
+# Importar WeasyPrint de forma segura: si faltan las bibliotecas
+# nativas (p.ej. gobject/cairo en Windows), evitamos que la
+# importación en el arranque bloquee `runserver`.
+try:
+    from weasyprint import HTML
+except Exception:
+    HTML = None
 
 # Modelos usados
 from cinema.models import Movie, Show, Room, Ticket, ShowSeat
@@ -518,6 +525,10 @@ def export_reportes_pdf(request):
         'top_peliculas': top_peliculas,
         'today': today,
     })
+
+    if HTML is None:
+        messages.error(request, "WeasyPrint no está disponible. Instala sus dependencias nativas o ejecuta este endpoint en un entorno donde WeasyPrint funcione.")
+        return redirect('admin_reportes')
 
     html = HTML(string=html_string, base_url=request.build_absolute_uri())
     pdf = html.write_pdf()

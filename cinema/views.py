@@ -6,7 +6,6 @@ from django.contrib import messages
 from .models import Show, ShowSeat, Ticket, TurnoCaja
 from django.template.loader import render_to_string
 import os
-from weasyprint import HTML
 from django.http import HttpResponse
 from django.db.models import Sum
 
@@ -203,6 +202,14 @@ def download_ticket_pdf(request, ticket_id):
 
     # Renderizar el HTML del ticket (reutilizamos o creamos uno específico para PDF)
     html_string = render_to_string('cinema/ticket_pdf.html', {'ticket': ticket})
+
+    # Intentar importar WeasyPrint en tiempo de ejecución; si falta
+    # (p. ej. en Windows sin runtime GTK), evitar romper el arranque.
+    try:
+        from weasyprint import HTML
+    except Exception:
+        messages.error(request, "La generación de PDF no está disponible en este entorno (WeasyPrint faltante).")
+        return redirect('ticket_detail', ticket_id=ticket.id)
 
     # Crear PDF
     html = HTML(string=html_string, base_url=request.build_absolute_uri())

@@ -3,52 +3,208 @@
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="mb-4">{{ titulo }}</h1>
 
-    <form method="post">
-        {% csrf_token %}
+<style>
+.dashboard-bg {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
 
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Película</label>
-                    {{ form.movie }}
+/* Card glass */
+.glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+    border-radius: 25px;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+    color: white;
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Header */
+.card-header-custom {
+    background: linear-gradient(90deg, #7f00ff, #e100ff);
+    border-radius: 25px 25px 0 0;
+    padding: 18px 30px; /* reducido vertical */
+}
+
+.card-header-custom h2 {
+    font-size: 1.8rem;
+    margin-bottom: 2px;
+}
+
+.card-header-custom small {
+    opacity: 0.85;
+}
+
+/* Card body - REDUCIDO */
+.glass-card .card-body {
+    padding: 20px 35px;
+}
+
+/* Inputs */
+.glass-card .form-control,
+.glass-card .form-select {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    border-radius: 12px;
+    padding: 6px 12px; /* menos altura */
+}
+
+.glass-card .form-select option {
+    background: white;
+    color: black;
+}
+
+.glass-card .form-control:focus,
+.glass-card .form-select:focus {
+    background: rgba(255,255,255,0.25);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+    color: white;
+}
+
+/* Labels */
+.glass-card label {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px; /* menos espacio */
+    display: block;
+}
+
+/* Menos espacio entre filas */
+.glass-card .row {
+    margin-bottom: 12px;
+}
+
+/* Precio */
+.input-group-text {
+    border-radius: 12px 0 0 12px;
+    padding: 6px 10px;
+}
+
+/* Switch */
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+/* Zona botones */
+.glass-card .d-flex {
+    margin-top: 10px !important;
+}
+
+/* Botones */
+.btn-modern {
+    border-radius: 50px;
+    padding: 8px 26px;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.btn-cancel {
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.6);
+    color: white;
+}
+
+.btn-cancel:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.btn-save {
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    border: none;
+    color: white;
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+</style>
+
+<div class="dashboard-bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+
+                <div class="glass-card">
+
+                    <!-- Header -->
+                    <div class="card-header-custom p-4 text-center">
+                        <h2 class="fw-bold mb-0">
+                            🎬 {{ titulo }}
+                        </h2>
+                        <small>Configura los detalles de la función</small>
+                    </div>
+
+                    <div class="p-5">
+
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="row g-4">
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Película</label>
+                                    {{ form.movie }}
+
+                                    <label class="form-label mt-4">Sala</label>
+                                    {{ form.room }}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Fecha</label>
+                                    {{ form.date }}
+
+                                    <label class="form-label mt-4">Hora</label>
+                                    {{ form.time }}
+
+                                    <label class="form-label mt-4">Precio base</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-transparent text-white border-0">$</span>
+                                        {{ form.base_price }}
+                                    </div>
+
+                                    <div class="form-check form-switch mt-4">
+                                        {{ form.active }}
+                                        <label class="form-check-label ms-2" for="{{ form.active.id_for_label }}">
+                                            Función activa
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-3 mt-5">
+                                <a href="{% url 'admin_funciones' %}" 
+                                   class="btn btn-modern btn-cancel">
+                                    Cancelar
+                                </a>
+
+                                <button type="submit" 
+                                        class="btn btn-modern btn-save">
+                                    Guardar Función
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Sala</label>
-                    {{ form.room }}
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Fecha</label>
-                    {{ form.date }}
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Hora</label>
-                    {{ form.time }}
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Precio base</label>
-                    {{ form.base_price }}
-                </div>
-
-                <div class="mb-3 form-check">
-                    {{ form.active }}
-                    <label class="form-check-label" for="{{ form.active.id_for_label }}">Función activa (visible en cartelera)</label>
-                </div>
             </div>
         </div>
-
-        <div class="mt-5 text-end">
-            <a href="{% url 'admin_funciones' %}" class="btn btn-secondary me-3">Cancelar</a>
-            <button type="submit" class="btn btn-primary btn-lg px-5">Guardar Función</button>
-        </div>
-    </form>
+    </div>
 </div>
+
 {% endblock %}

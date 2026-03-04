@@ -1,5 +1,32 @@
 <!DOCTYPE html>
 <html lang="es">
+    <style>
+        /* Navbar más compacta */
+.navbar-custom {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    min-height: 50px;
+}
+
+/* Reducir tamaño del brand */
+.navbar-custom .navbar-brand {
+    font-size: 1rem;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Reducir tamaño de los links */
+.navbar-custom .nav-link {
+    font-size: 0.9rem;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+/* Si tiene botón toggler */
+.navbar-custom .navbar-toggler {
+    padding: 4px 8px;
+}
+    </style>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,7 +64,7 @@
 <body>
 
 {% if not request.path == '/login/' %}
-<nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-xl fixed-top">
     <div class="container">
         <a class="navbar-brand fw-bold" href="/">🎬 SIGAC</a>
 
@@ -61,7 +88,7 @@
 
 {% block content %}{% endblock %}
 
-<footer class="footer-custom text-center text-white py-4 mt-5">
+<footer class="footer-custom text-center  shadow-xl fixed-bottom">
     <small>© 2026 SIGAC - Sistema Integral de Gestión de Cine</small>
 </footer>
 

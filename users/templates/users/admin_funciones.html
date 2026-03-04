@@ -3,47 +3,212 @@
 {% block title %}Admin - Funciones{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Funciones Programadas</h1>
-        <a href="{% url 'admin_funcion_crear' %}" class="btn btn-success btn-lg">
-            <i class="bi bi-plus-circle me-2"></i> Programar Nueva Función
-        </a>
-    </div>
 
-    {% if messages %}
-        <div class="mb-4">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
+<style>
+body {
+    padding-top: 80px;
+    background: #121212; /* fondo oscuro */
+}
+
+/* Centrado real */
+.admin-wrapper {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+/* Card principal */
+.admin-card {
+    width: 100%;
+    max-width: 1050px;
+    background: #1e1e2f; /* antes blanco */
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+    color: #e4e4e4;
+}
+
+/* Header */
+.admin-card h2 {
+    font-weight: 700;
+    color: #c8b6ff;
+}
+
+.admin-card small {
+    color: #9fa0c3;
+}
+
+/* Botón principal */
+.btn-primary {
+    background: #c8b6ff;
+    border: none;
+    color: #4b2e83;
+    border-radius: 50px;
+    padding: 10px 24px;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: #b197fc;
+    color: #3a1f6d;
+}
+
+/* Tabla */
+.table {
+    margin-top: 10px;
+    color: #e4e4e4;
+}
+
+.table thead {
+    background: #2a2a40;
+}
+
+.table thead th {
+    font-weight: 600;
+    color: #c8b6ff;
+    padding: 18px;
+    border: none;
+}
+
+.table td {
+    padding: 18px;
+    vertical-align: middle;
+    border-top: 1px solid #2f2f45;
+}
+
+.table tbody tr {
+    transition: 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #26263a;
+}
+
+/* Badges suaves adaptados a oscuro */
+.badge.bg-success {
+    background-color: #1b4332 !important;
+    color: #95d5b2;
+    padding: 6px 14px;
+    border-radius: 50px;
+}
+
+.badge.bg-danger {
+    background-color: #590d22 !important;
+    color: #ff8fa3;
+    padding: 6px 14px;
+    border-radius: 50px;
+}
+
+/* Botones pequeños */
+.btn-sm {
+    border-radius: 8px;
+    padding: 6px 12px;
+}
+
+.btn-outline-primary {
+    border-color: #c8b6ff;
+    color: #c8b6ff;
+}
+
+.btn-outline-primary:hover {
+    background: #c8b6ff;
+    color: #1e1e2f;
+}
+
+.btn-outline-danger {
+    border-color: #ff8fa3;
+    color: #ff8fa3;
+}
+
+.btn-outline-danger:hover {
+    background: #ff8fa3;
+    color: #1e1e2f;
+}
+
+.action-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: 0.2s ease;
+    font-size: 16px;
+}
+
+.action-icon.edit {
+    background: rgba(200, 182, 255, 0.15);
+    color: #c8b6ff;
+}
+
+.action-icon.edit:hover {
+    background: #c8b6ff;
+    color: #1e1e2f;
+}
+
+.action-icon.delete {
+    background: rgba(255, 143, 163, 0.15);
+    color: #ff8fa3;
+}
+
+.action-icon.delete:hover {
+    background: #ff8fa3;
+    color: #1e1e2f;
+}
+</style>
+
+<div class="admin-wrapper">
+    <div class="admin-card">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-1">Funciones Programadas</h2>
+                <small>Panel de administración</small>
+            </div>
+
+            <a href="{% url 'admin_funcion_crear' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i> Nueva Función
+            </a>
         </div>
-    {% endif %}
 
-    {% if funciones %}
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Película</th>
-                        <th>Sala</th>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>Precio</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for funcion in funciones %}
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if funciones %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
                         <tr>
-                            <td>{{ funcion.movie.title }}</td>
+                            <th>Película</th>
+                            <th>Sala</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Precio</th>
+                            <th>Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for funcion in funciones %}
+                        <tr>
+                            <td class="fw-semibold">{{ funcion.movie.title }}</td>
                             <td>{{ funcion.room.name }}</td>
                             <td>{{ funcion.date|date:"d/m/Y" }}</td>
                             <td>{{ funcion.time|time:"H:i" }}</td>
-                            <td>${{ funcion.base_price|floatformat:2 }}</td>
+                            <td class="fw-semibold text-primary">
+                                ${{ funcion.base_price|floatformat:2 }}
+                            </td>
                             <td>
                                 {% if funcion.active %}
                                     <span class="badge bg-success">Activa</span>
@@ -51,25 +216,29 @@
                                     <span class="badge bg-danger">Inactiva</span>
                                 {% endif %}
                             </td>
-                            <td>
-                                <a href="{% url 'admin_funcion_editar' funcion.id %}" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-pencil"></i> Editar
+                            <td class="text-center">
+                                <a href="{% url 'admin_funcion_editar' funcion.id %}" class="action-link edit me-3">
+                                    <i class="bi bi-pencil-fill me-1"></i> Editar
                                 </a>
-                                <a href="{% url 'admin_funcion_eliminar' funcion.id %}" class="btn btn-sm btn-danger">
-                                    <i class="bi bi-trash"></i> Eliminar
+
+                                <a href="{% url 'admin_funcion_eliminar' funcion.id %}" class="action-link delete">
+                                    <i class="bi bi-trash-fill me-1"></i> Eliminar
                                 </a>
                             </td>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="alert alert-info text-center py-5">
-            <i class="bi bi-calendar-event display-1 text-muted mb-3 d-block"></i>
-            <h5>No hay funciones programadas</h5>
-            <p>Programa una nueva función para que aparezca en la cartelera.</p>
-        </div>
-    {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-event display-4 text-muted mb-3 d-block"></i>
+                <h5>No hay funciones programadas</h5>
+                <p class="text-muted">Programa una nueva función para comenzar.</p>
+            </div>
+        {% endif %}
+
+    </div>
 </div>
+
 {% endblock %}
