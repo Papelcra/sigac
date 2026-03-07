@@ -5,240 +5,282 @@
 {% block content %}
 
 <style>
-body {
-    padding-top: 80px;
-    background: #121212; /* fondo oscuro */
+
+/* FONDO */
+body{
+padding-top:80px;
+background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+min-height:100vh;
 }
 
-/* Centrado real */
-.admin-wrapper {
-    min-height: calc(100vh - 80px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 20px;
+/* WRAPPER */
+.admin-wrapper{
+min-height:calc(100vh - 80px);
+display:flex;
+justify-content:center;
+align-items:center;
+padding:40px 20px;
 }
 
-/* Card principal */
-.admin-card {
-    width: 100%;
-    max-width: 1050px;
-    background: #1e1e2f; /* antes blanco */
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
-    color: #e4e4e4;
+/* CARD GLASS */
+.admin-card{
+width:100%;
+max-width:1100px;
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(15px);
+border-radius:25px;
+border:1px solid rgba(255,255,255,0.15);
+box-shadow:0 25px 60px rgba(0,0,0,0.6);
+padding:40px;
+color:rgb(245, 183, 252);
 }
 
-/* Header */
-.admin-card h2 {
-    font-weight: 700;
-    color: #c8b6ff;
+/* HEADER */
+.admin-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
 }
 
-.admin-card small {
-    color: #9fa0c3;
+.admin-header h2{
+font-weight:700;
+margin:0;
 }
 
-/* Botón principal */
-.btn-primary {
-    background: #c8b6ff;
-    border: none;
-    color: #4b2e83;
-    border-radius: 50px;
-    padding: 10px 24px;
-    font-weight: 600;
+.admin-header small{
+opacity:.7;
 }
 
-.btn-primary:hover {
-    background: #b197fc;
-    color: #3a1f6d;
+/* BOTON PRINCIPAL */
+.btn-primary{
+border-radius:50px;
+padding:10px 26px;
+font-weight:600;
+border:none;
+color:rgb(9, 9, 9);
+background:linear-gradient(90deg,#7f00ff,#e100ff);
+transition:.3s;
 }
 
-/* Tabla */
-.table {
-    margin-top: 10px;
-    color: #e4e4e4;
+.btn-primary:hover{
+transform:translateY(-2px);
+box-shadow:0 8px 20px rgba(0,0,0,0.4);
 }
 
-.table thead {
-    background: #2a2a40;
+/* TABLA */
+.table{
+color:rgb(9, 59, 77);
+margin-top:10px;
+border-collapse:separate;
+border-spacing:0 10px;
 }
 
-.table thead th {
-    font-weight: 600;
-    color: #c8b6ff;
-    padding: 18px;
-    border: none;
+/* HEADER TABLA */
+.table thead th{
+background:rgb(245, 183, 252);
+border:none;
+padding:16px;
+font-weight:600;
+}   
+
+/* FILAS */
+.table tbody tr{
+background:rgb(245, 183, 252);
+border-radius:12px;
+transition:.2s;
 }
 
-.table td {
-    padding: 18px;
-    vertical-align: middle;
-    border-top: 1px solid #2f2f45;
+.table tbody tr:hover{
+background:rgb(254, 248, 255);
+transform:scale(1.01);
 }
 
-.table tbody tr {
-    transition: 0.2s ease;
+/* CELDAS */
+.table td{
+padding:16px;
+border:none;
+vertical-align:middle;
+background:rgba(59, 22, 59, 0.619);
 }
 
-.table tbody tr:hover {
-    background-color: #26263a;
+/* PRECIO */
+.text-primary{
+color:#5fc7e4 !important;
 }
 
-/* Badges suaves adaptados a oscuro */
-.badge.bg-success {
-    background-color: #1b4332 !important;
-    color: #95d5b2;
-    padding: 6px 14px;
-    border-radius: 50px;
+/* BADGES */
+.badge{
+padding:6px 14px;
+border-radius:50px;
+font-weight:500;
 }
 
-.badge.bg-danger {
-    background-color: #590d22 !important;
-    color: #ff8fa3;
-    padding: 6px 14px;
-    border-radius: 50px;
+.badge.bg-success{
+background:linear-gradient(90deg,#00ff9d,#00c896);
+color:rgb(0, 128, 128);
 }
 
-/* Botones pequeños */
-.btn-sm {
-    border-radius: 8px;
-    padding: 6px 12px;
+.badge.bg-danger{
+background:linear-gradient(90deg,#ff4b5c,#ff0033);
+color:rgb(223, 120, 215);
 }
 
-.btn-outline-primary {
-    border-color: #c8b6ff;
-    color: #c8b6ff;
+/* ACCIONES */
+.action-link{
+text-decoration:none;
+font-weight:500;
+transition:.2s;
 }
 
-.btn-outline-primary:hover {
-    background: #c8b6ff;
-    color: #1e1e2f;
+.action-link.edit{
+color:#00c6ff;
 }
 
-.btn-outline-danger {
-    border-color: #ff8fa3;
-    color: #ff8fa3;
+.action-link.edit:hover{
+color:#66e3ff;
 }
 
-.btn-outline-danger:hover {
-    background: #ff8fa3;
-    color: #1e1e2f;
+.action-link.delete{
+color:#ff4b5c;
 }
 
-.action-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    text-decoration: none;
-    transition: 0.2s ease;
-    font-size: 16px;
+.action-link.delete:hover{
+color:#ff8a95;
 }
 
-.action-icon.edit {
-    background: rgba(200, 182, 255, 0.15);
-    color: #c8b6ff;
+/* ESTADO VACIO */
+.empty-state{
+text-align:center;
+padding:60px 20px;
+opacity:.8;
 }
 
-.action-icon.edit:hover {
-    background: #c8b6ff;
-    color: #1e1e2f;
+.empty-state i{
+font-size:60px;
+margin-bottom:10px;
 }
 
-.action-icon.delete {
-    background: rgba(255, 143, 163, 0.15);
-    color: #ff8fa3;
-}
-
-.action-icon.delete:hover {
-    background: #ff8fa3;
-    color: #1e1e2f;
-}
 </style>
 
 <div class="admin-wrapper">
-    <div class="admin-card">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="mb-1">Funciones Programadas</h2>
-                <small>Panel de administración</small>
-            </div>
+<div class="admin-card">
 
-            <a href="{% url 'admin_funcion_crear' %}" class="btn btn-primary">
-                <i class="bi bi-plus-circle me-2"></i> Nueva Función
-            </a>
-        </div>
+<div class="admin-header">
 
-        {% if messages %}
-            <div class="mb-4">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+<div>
+<h2>🎬 Funciones Programadas</h2>
+<small>Panel de administración</small>
+</div>
 
-        {% if funciones %}
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th>Película</th>
-                            <th>Sala</th>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>Precio</th>
-                            <th>Estado</th>
-                            <th class="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for funcion in funciones %}
-                        <tr>
-                            <td class="fw-semibold">{{ funcion.movie.title }}</td>
-                            <td>{{ funcion.room.name }}</td>
-                            <td>{{ funcion.date|date:"d/m/Y" }}</td>
-                            <td>{{ funcion.time|time:"H:i" }}</td>
-                            <td class="fw-semibold text-primary">
-                                ${{ funcion.base_price|floatformat:2 }}
-                            </td>
-                            <td>
-                                {% if funcion.active %}
-                                    <span class="badge bg-success">Activa</span>
-                                {% else %}
-                                    <span class="badge bg-danger">Inactiva</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-center">
-                                <a href="{% url 'admin_funcion_editar' funcion.id %}" class="action-link edit me-3">
-                                    <i class="bi bi-pencil-fill me-1"></i> Editar
-                                </a>
+<a href="{% url 'admin_funcion_crear' %}" class="btn btn-primary">
+<i class="bi bi-plus-circle me-2"></i> Nueva Función
+</a>
 
-                                <a href="{% url 'admin_funcion_eliminar' funcion.id %}" class="action-link delete">
-                                    <i class="bi bi-trash-fill me-1"></i> Eliminar
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div class="text-center py-5">
-                <i class="bi bi-calendar-event display-4 text-muted mb-3 d-block"></i>
-                <h5>No hay funciones programadas</h5>
-                <p class="text-muted">Programa una nueva función para comenzar.</p>
-            </div>
-        {% endif %}
+</div>
 
-    </div>
+{% if messages %}
+<div class="mb-4">
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+{{ message }}
+<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% if funciones %}
+
+<div class="table-responsive">
+
+<table class="table align-middle">
+
+<thead>
+<tr>
+<th>Película</th>
+<th>Sala</th>
+<th>Fecha</th>
+<th>Hora</th>
+<th>Precio</th>
+<th>Estado</th>
+<th class="text-center">Acciones</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for funcion in funciones %}
+
+<tr>
+
+<td class="fw-semibold">
+{{ funcion.movie.title }}
+</td>
+
+<td>
+{{ funcion.room.name }}
+</td>
+
+<td>
+{{ funcion.date|date:"d/m/Y" }}
+</td>
+
+<td>
+{{ funcion.time|time:"H:i" }}
+</td>
+
+<td class="fw-semibold text-primary">
+${{ funcion.base_price|floatformat:2 }}
+</td>
+
+<td>
+{% if funcion.active %}
+<span class="badge bg-success">Activa</span>
+{% else %}
+<span class="badge bg-danger">Inactiva</span>
+{% endif %}
+</td>
+
+<td class="text-center">
+
+<a href="{% url 'admin_funcion_editar' funcion.id %}" class="action-link edit me-3">
+<i class="bi bi-pencil-fill me-1"></i> Editar
+</a>
+
+<a href="{% url 'admin_funcion_eliminar' funcion.id %}" class="action-link delete">
+<i class="bi bi-trash-fill me-1"></i> Eliminar
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% else %}
+
+<div class="empty-state">
+
+<i class="bi bi-calendar-event"></i>
+
+<h5>No hay funciones programadas</h5>
+
+<p>Programa una nueva función para comenzar.</p>
+
+</div>
+
+{% endif %}
+
+</div>
+
 </div>
 
 {% endblock %}

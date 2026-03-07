@@ -3,118 +3,288 @@
 {% block title %}Reportes - Administrador{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="text-center mb-5 fw-bold text-dark">Reportes Financieros</h1>
 
-    <!-- Resumen rápido -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-4">
-            <div class="card shadow border-primary h-100">
-                <div class="card-body text-center">
-                    <h5 class="card-title fw-bold">Hoy ({{ today|date:"d/m/Y" }})</h5>
-                    <h3 class="text-primary fw-bold">${{ total_dia|floatformat:2 }}</h3>
-                    <p class="text-muted">{{ boletos_dia }} boletos vendidos</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow border-success h-100">
-                <div class="card-body text-center">
-                    <h5 class="card-title fw-bold">Esta semana</h5>
-                    <h3 class="text-success fw-bold">${{ total_semana|floatformat:2 }}</h3>
-                    <p class="text-muted">Ingresos acumulados</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow border-info h-100">
-                <div class="card-body text-center">
-                    <h5 class="card-title fw-bold">Este mes</h5>
-                    <h3 class="text-info fw-bold">${{ total_mes|floatformat:2 }}</h3>
-                    <p class="text-muted">Ingresos acumulados</p>
-                </div>
-            </div>
-        </div>
-    </div>
+<style>
 
-    <!-- Top cajeros -->
-    <div class="card shadow mb-5">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0 fw-bold">Top 5 Cajeros (ventas totales)</h5>
-        </div>
-        <div class="card-body">
-            {% if por_cajero %}
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Cajero</th>
-                                <th>Boletos vendidos</th>
-                                <th>Total ventas</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cajero in por_cajero %}
-                                <tr>
-                                    <td>{{ cajero.user__username|default:"-" }}</td>
-                                    <td>{{ cajero.boletos }}</td>
-                                    <td>${{ cajero.total|floatformat:2 }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-muted text-center py-4">Aún no hay ventas registradas.</p>
-            {% endif %}
-        </div>
-    </div>
+/* FONDO GENERAL */
 
-    <!-- Top películas -->
-    <div class="card shadow mb-5">
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0 fw-bold">Top 5 Películas más vendidas</h5>
-        </div>
-        <div class="card-body">
-            {% if top_peliculas %}
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Película</th>
-                                <th>Boletos vendidos</th>
-                                <th>Ingresos</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for peli in top_peliculas %}
-                                <tr>
-                                    <td>{{ peli.show_seat__show__movie__title }}</td>
-                                    <td>{{ peli.boletos }}</td>
-                                    <td>${{ peli.ingresos|floatformat:2 }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-muted text-center py-4">Aún no hay ventas por película.</p>
-            {% endif %}
-        </div>
-    </div>
+.page-bg{
+background: radial-gradient(circle at top,#2b2d55,#14162b);
+min-height:100vh;
+padding:50px 20px;
+color:white;
+}
 
-    <!-- Botón exportar (AHORA FUNCIONAL) -->
-    <div class="text-center mt-5">
-    <a href="{% url 'export_reportes_pdf' %}" class="btn btn-danger btn-lg px-5 py-3">
-        <i class="bi bi-file-earmark-pdf me-2"></i> Exportar como PDF
-    </a>
-    
-    </div>
+/* TITULO */
 
-    <div class="text-center mt-4">
-        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
-            Volver al Dashboard
-        </a>
-    </div>
+.page-title{
+font-size:2.8rem;
+font-weight:700;
+text-align:center;
+margin-bottom:50px;
+}
+
+/* CARDS RESUMEN */
+
+.report-card{
+background:rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.1);
+border-radius:18px;
+backdrop-filter:blur(10px);
+box-shadow:0 10px 30px rgba(0,0,0,.35);
+transition:.25s;
+}
+
+.report-card:hover{
+transform:translateY(-4px);
+box-shadow:0 15px 40px rgba(0,0,0,.45);
+}
+
+.report-card h5{
+font-weight:600;
+margin-bottom:10px;
+}
+
+.report-card h3{
+font-weight:700;
+font-size:2rem;
+}
+
+/* TABLAS */
+
+.report-table{
+background:rgba(255,255,255,0.05);
+border-radius:20px;
+overflow:hidden;
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:0 20px 50px rgba(0,0,0,.35);
+}
+
+.report-table thead{
+background:linear-gradient(90deg,#7f00ff,#a855f7);
+}
+
+.report-table thead th{
+border:none;
+color:rgb(14, 14, 14);
+padding:14px;
+font-weight:600;
+}
+
+.report-table tbody tr{
+border-color:rgba(255,255,255,0.05);
+}
+
+.report-table tbody tr:hover{
+background:rgba(88,28,135,0.35);
+}
+
+.report-table td{
+padding:14px;
+vertical-align:middle;
+color:rgb(8, 8, 8);
+}
+
+/* HEADERS DE TABLA */
+
+.section-header{
+background:linear-gradient(90deg,#7f00ff,#9333ea);
+padding:15px 20px;
+font-weight:600;
+font-size:1.1rem;
+border-top-left-radius:20px;
+border-top-right-radius:20px;
+}
+
+/* BOTON PDF */
+
+.btn-pdf{
+background:linear-gradient(90deg,#7f00ff,#e100ff);
+border:none;
+border-radius:50px;
+padding:14px 40px;
+font-weight:600;
+color:white;
+box-shadow:0 0 20px rgba(168,85,247,.4);
+transition:.25s;
+}
+
+.btn-pdf:hover{
+transform:translateY(-3px);
+box-shadow:0 10px 35px rgba(168,85,247,.6);
+color:white;
+}
+
+/* BOTON VOLVER */
+
+.btn-back{
+border:1px solid rgba(255,255,255,0.2);
+color:white;
+border-radius:30px;
+padding:8px 20px;
+}
+
+.btn-back:hover{
+background:rgba(255,255,255,0.1);
+color:white;
+}
+
+</style>
+
+
+<div class="page-bg">
+
+<div class="container">
+
+<h1 class="page-title">Reportes Financieros</h1>
+
+<!-- Resumen rápido -->
+
+<div class="row g-4 mb-5">
+
+<div class="col-md-4">
+<div class="report-card p-4 text-center">
+<h5>Hoy ({{ today|date:"d/m/Y" }})</h5>
+<h3 class="text-info">${{ total_dia|floatformat:2 }}</h3>
+<p class="text-light">{{ boletos_dia }} boletos vendidos</p>
 </div>
+</div>
+
+<div class="col-md-4">
+<div class="report-card p-4 text-center">
+<h5>Esta semana</h5>
+<h3 class="text-success">${{ total_semana|floatformat:2 }}</h3>
+<p class="text-light">Ingresos acumulados</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-card p-4 text-center">
+<h5>Este mes</h5>
+<h3 class="text-warning">${{ total_mes|floatformat:2 }}</h3>
+<p class="text-light">Ingresos acumulados</p>
+</div>
+</div>
+
+</div>
+
+
+<!-- Top cajeros -->
+
+<div class="report-table mb-5">
+
+<div class="section-header">
+Top 5 Cajeros (ventas totales)
+</div>
+
+<div class="table-responsive">
+
+<table class="table table-borderless mb-0">
+
+<thead>
+<tr>
+<th>Cajero</th>
+<th>Boletos vendidos</th>
+<th>Total ventas</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for cajero in por_cajero %}
+
+<tr>
+<td>{{ cajero.user__username|default:"-" }}</td>
+<td>{{ cajero.boletos }}</td>
+<td>${{ cajero.total|floatformat:2 }}</td>
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="3" class="text-center py-4">Aún no hay ventas registradas.</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- Top películas -->
+
+<div class="report-table mb-5">
+
+<div class="section-header">
+Top 5 Películas más vendidas
+</div>
+
+<div class="table-responsive">
+
+<table class="table table-borderless mb-0">
+
+<thead>
+<tr>
+<th>Película</th>
+<th>Boletos vendidos</th>
+<th>Ingresos</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for peli in top_peliculas %}
+
+<tr>
+<td>{{ peli.show_seat__show__movie__title }}</td>
+<td>{{ peli.boletos }}</td>
+<td>${{ peli.ingresos|floatformat:2 }}</td>
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="3" class="text-center py-4">Aún no hay ventas por película.</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- BOTONES -->
+
+<div class="text-center mt-5">
+
+<a href="{% url 'export_reportes_pdf' %}" class="btn btn-pdf btn-lg">
+<i class="bi bi-file-earmark-pdf me-2"></i>
+Exportar como PDF
+</a>
+
+</div>
+
+<div class="text-center mt-4">
+
+<a href="{% url 'admin_dashboard' %}" class="btn btn-back">
+Volver al Dashboard
+</a>
+
+</div>
+
+</div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 {% endblock %}

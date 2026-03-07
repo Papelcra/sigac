@@ -3,56 +3,331 @@
 {% block title %}Admin - Salas{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Salas del Cine</h1>
-        <a href="{% url 'admin_sala_crear' %}" class="btn btn-success btn-lg">
-            <i class="bi bi-plus-circle me-2"></i> Crear Nueva Sala
-        </a>
-    </div>
 
-    {% if messages %}
-        <div class="mb-4">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
+<style>
 
-    {% if salas %}
-        <div class="row g-4">
-            {% for sala in salas %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card shadow h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ sala.name }}</h5>
-                            <p class="card-text">
-                                <strong>Capacidad:</strong> {{ sala.capacity }} personas<br>
-                                <strong>Asientos generados:</strong> {{ sala.seats.count }}<br>
-                                <strong>Funciones asociadas:</strong> {{ sala.shows.count }}
-                            </p>
-                            <div class="d-flex gap-2 mt-3">
-                                <a href="{% url 'admin_sala_editar' sala.id %}" class="btn btn-primary btn-sm">
-                                    <i class="bi bi-pencil"></i> Editar
-                                </a>
-                                <a href="{% url 'admin_sala_eliminar' sala.id %}" class="btn btn-danger btn-sm">
-                                    <i class="bi bi-trash"></i> Eliminar
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="alert alert-info text-center py-5">
-            <i class="bi bi-building display-1 text-muted mb-3 d-block"></i>
-            <h5>Aún no hay salas creadas</h5>
-            <p>Crea una sala para empezar a programar funciones.</p>
-        </div>
-    {% endif %}
+/* ===== FONDO ===== */
+body{
+background:linear-gradient(135deg,#1f2041,#2a2c5a);
+color:white;
+}
+
+/* ===== CONTENEDOR ===== */
+.admin-wrapper{
+max-width:1250px;
+margin:auto;
+padding:50px 20px;
+}
+
+/* ===== HEADER ===== */
+.admin-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:40px;
+}
+
+.admin-header h1{
+font-weight:700;
+letter-spacing:.5px;
+color:#e6dcff;
+}
+
+/* ===== BOTON CREAR ===== */
+.btn-create{
+background:linear-gradient(90deg,#7f00ff,#e100ff);
+border:none;
+border-radius:50px;
+padding:12px 28px;
+font-weight:600;
+color:white;
+transition:.3s;
+box-shadow:0 10px 30px rgba(127,0,255,0.4);
+}
+
+.btn-create:hover{
+transform:translateY(-3px);
+box-shadow:0 18px 40px rgba(127,0,255,0.6);
+}
+
+/* ===== GRID ===== */
+.salas-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+gap:30px;
+}
+
+/* ===== CARD ===== */
+.sala-card{
+
+background:rgba(255,255,255,0.05);
+border-radius:22px;
+
+backdrop-filter:blur(20px);
+
+border:1px solid rgba(255,255,255,0.1);
+
+box-shadow:
+0 20px 50px rgba(0,0,0,0.5),
+inset 0 1px 0 rgba(255,255,255,0.05);
+
+padding:28px;
+
+transition:.3s;
+
+position:relative;
+}
+
+/* línea decorativa superior */
+
+.sala-card::before{
+content:"";
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:4px;
+
+background:linear-gradient(90deg,#7f00ff,#e100ff,#00c6ff);
+
+border-top-left-radius:22px;
+border-top-right-radius:22px;
+}
+
+.sala-card:hover{
+transform:translateY(-8px);
+box-shadow:0 35px 70px rgba(0,0,0,0.6);
+}
+
+/* ===== TITULO ===== */
+
+.sala-title{
+font-size:1.35rem;
+font-weight:700;
+color:#f0e9ff;
+margin-bottom:15px;
+}
+
+/* ===== INFO ===== */
+
+.sala-info{
+font-size:.95rem;
+color:#d2d2f0;
+line-height:1.8;
+}
+
+/* indicadores */
+
+.info-item{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:6px;
+}
+
+.info-icon{
+width:32px;
+height:32px;
+
+border-radius:8px;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+background:rgba(127,0,255,0.15);
+
+color:#c8b6ff;
+
+font-size:14px;
+}
+
+/* ===== BOTONES ===== */
+
+.sala-actions{
+display:flex;
+gap:12px;
+margin-top:22px;
+}
+
+.btn-edit{
+
+flex:1;
+
+background:rgba(0,198,255,0.15);
+
+border:1px solid rgba(0,198,255,0.4);
+
+color:#8de6ff;
+
+border-radius:10px;
+
+font-size:.9rem;
+
+padding:7px;
+}
+
+.btn-edit:hover{
+
+background:#00c6ff;
+
+color:#0f172a;
+}
+
+.btn-delete{
+
+flex:1;
+
+background:rgba(255,80,120,0.15);
+
+border:1px solid rgba(255,80,120,0.4);
+
+color:#ff8fa3;
+
+border-radius:10px;
+
+font-size:.9rem;
+
+padding:7px;
+}
+
+.btn-delete:hover{
+
+background:#ff4d6d;
+
+color:white;
+}
+
+/* ===== EMPTY STATE ===== */
+
+.empty-state{
+
+text-align:center;
+
+padding:90px 20px;
+
+color:#cfcfe6;
+}
+
+.empty-state i{
+
+font-size:80px;
+
+opacity:.5;
+
+margin-bottom:20px;
+}
+
+</style>
+
+
+<div class="admin-wrapper">
+
+<div class="admin-header">
+
+<h1>
+<i class="bi bi-building me-2"></i>
+Salas del Cine
+</h1>
+
+<a href="{% url 'admin_sala_crear' %}" class="btn btn-create">
+
+<i class="bi bi-plus-circle me-2"></i>
+
+Crear Nueva Sala
+
+</a>
+
 </div>
+
+
+{% if messages %}
+<div class="mb-4">
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+{{ message }}
+<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+
+
+{% if salas %}
+
+<div class="salas-grid">
+
+{% for sala in salas %}
+
+<div class="sala-card">
+
+<div class="sala-title">
+🎬 {{ sala.name }}
+</div>
+
+<div class="sala-info">
+
+<div class="info-item">
+<div class="info-icon">
+<i class="bi bi-people"></i>
+</div>
+<div>
+<strong>Capacidad:</strong> {{ sala.capacity }} personas
+</div>
+</div>
+
+<div class="info-item">
+<div class="info-icon">
+<i class="bi bi-grid-3x3-gap"></i>
+</div>
+<div>
+<strong>Asientos generados:</strong> {{ sala.seats.count }}
+</div>
+</div>
+
+<div class="info-item">
+<div class="info-icon">
+<i class="bi bi-calendar-event"></i>
+</div>
+<div>
+<strong>Funciones asociadas:</strong> {{ sala.shows.count }}
+</div>
+</div>
+
+</div>
+
+<div class="sala-actions">
+
+<a href="{% url 'admin_sala_editar' sala.id %}" class="btn btn-edit btn-sm">
+<i class="bi bi-pencil"></i> Editar
+</a>
+
+<a href="{% url 'admin_sala_eliminar' sala.id %}" class="btn btn-delete btn-sm">
+<i class="bi bi-trash"></i> Eliminar
+</a>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="empty-state">
+
+<i class="bi bi-building"></i>
+
+<h4>Aún no hay salas creadas</h4>
+
+<p>Crea una sala para empezar a programar funciones.</p>
+
+</div>
+
+{% endif %}
+
+</div>
+
 {% endblock %}

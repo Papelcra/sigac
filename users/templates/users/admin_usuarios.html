@@ -3,75 +3,283 @@
 {% block title %}Admin - Usuarios{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Gestión de Usuarios</h1>
-        <a href="{% url 'admin_usuario_crear' %}" class="btn btn-success btn-lg">
-            <i class="bi bi-person-plus me-2"></i> Crear Nuevo Usuario
-        </a>
-    </div>
 
-    {% if messages %}
-        <div class="mb-4">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
+<style>
 
-    {% if usuarios %}
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Email</th>
-                        <th>Rol</th>
-                        <th>Activo</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for usuario in usuarios %}
-                        <tr>
-                            <td>{{ usuario.username }}</td>
-                            <td>{{ usuario.email|default:"-" }}</td>
-                            <td>
-                                <span class="badge bg-{% if usuario.role == 'admin' %}primary{% elif usuario.role == 'cajero' %}success{% elif usuario.role == 'vendedor' %}warning{% elif usuario.role == 'vigilante' %}info{% else %}secondary{% endif %}">
-                                    {{ usuario.role|capfirst }}
-                                </span>
-                            </td>
-                            <td>
-                                {% if usuario.is_active %}
-                                    <span class="badge bg-success">Sí</span>
-                                {% else %}
-                                    <span class="badge bg-danger">No</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="{% url 'admin_usuario_editar' usuario.id %}" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-pencil"></i> Editar
-                                </a>
-                                {% if usuario != request.user %}
-                                    <a href="{% url 'admin_usuario_eliminar' usuario.id %}" class="btn btn-sm btn-danger">
-                                        <i class="bi bi-trash"></i> Eliminar
-                                    </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="alert alert-info text-center py-5">
-            <i class="bi bi-people display-1 text-muted mb-3 d-block"></i>
-            <h5>No hay usuarios registrados</h5>
-            <p>Crea nuevos usuarios para asignar roles al equipo del cine.</p>
-        </div>
-    {% endif %}
+/* QUITAR FONDO BLANCO GLOBAL */
+body{
+background: radial-gradient(circle at top,#2b2d55,#14162b);
+min-height:100vh;
+color:white;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.page-bg{
+background: transparent;
+min-height:100vh;
+padding:50px 20px;
+}
+
+/* HEADER */
+.page-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:40px;
+}
+
+.page-title{
+font-size:3rem;
+font-weight:700;
+}
+
+/* BOTON CREAR */
+
+.btn-create{
+background:linear-gradient(90deg,#7f00ff,#e100ff);
+border:none;
+border-radius:50px;
+padding:12px 28px;
+font-weight:600;
+color:white;
+transition:.25s;
+box-shadow:0 0 20px rgba(168,85,247,.35);
+}
+
+.btn-create:hover{
+transform:translateY(-3px);
+box-shadow:0 10px 30px rgba(168,85,247,.6);
+color:white;
+}
+
+.admin-table{
+background: linear-gradient(145deg,#2a2d5f,#1b1e3a);
+border-radius: 25px;
+padding: 20px;
+border: 1px solid rgba(255,255,255,0.08);
+box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* TABLA */
+
+.admin-table table{
+background: transparent;
+color: white;
+margin-bottom:0;
+}
+
+.admin-table thead{
+background: linear-gradient(90deg,#7f00ff,#22d3ee);
+}
+
+.admin-table th{
+color:white;
+font-weight:600;
+border:none;
+padding:16px;
+}
+
+.admin-table td{
+border-color: rgba(236, 227, 227, 0.08);
+padding:16px;
+}
+
+/* HOVER FILAS */
+
+.admin-table tbody tr:hover{
+background: rgba(255,255,255,0.05);
+}
+
+/* QUITAR FONDO BLANCO BOOTSTRAP */
+
+.table{
+background:transparent !important;
+}
+
+.table tr,
+.table td,
+.table th{
+background:transparent !important;
+}
+
+/* BADGES */
+
+.role-badge{
+padding:6px 12px;
+border-radius:20px;
+font-size:.75rem;
+font-weight:600;
+}
+
+.role-admin{background:#6366f1;}
+.role-cajero{background:#22c55e;}
+.role-vendedor{background:#f59e0b;}
+.role-vigilante{background:#06b6d4;}
+.role-default{background:#6b7280;}
+
+.badge-active{
+background:#22c55e;
+padding:6px 12px;
+border-radius:20px;
+font-size:.75rem;
+}
+
+.badge-inactive{
+background:#ef4444;
+padding:6px 12px;
+border-radius:20px;
+font-size:.75rem;
+}
+
+/* BOTONES */
+
+.btn-edit{
+background:#2563eb;
+border:none;
+padding:6px 12px;
+border-radius:8px;
+color:white;
+}
+
+.btn-delete{
+background:#ef4444;
+border:none;
+padding:6px 12px;
+border-radius:8px;
+color:white;
+}
+
+.btn-edit:hover{
+background:#1d4ed8;
+}
+
+.btn-delete:hover{
+background:#dc2626;
+}
+
+</style>
+
+
+<div class="page-bg">
+
+<div class="container">
+
+<div class="page-header">
+
+<h1 class="page-title">
+<i class="bi bi-people"></i>
+Gestión de Usuarios
+</h1>
+
+<a href="{% url 'admin_usuario_crear' %}" class="btn btn-create">
+<i class="bi bi-person-plus me-2"></i>
+Crear Usuario
+</a>
+
 </div>
+
+
+{% if messages %}
+<div class="mb-4">
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+{{ message }}
+<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+
+
+{% if usuarios %}
+
+<div class="table-responsive admin-table">
+
+<table class="table table-borderless text-white mb-0">
+
+<thead>
+<tr>
+<th>Usuario</th>
+<th>Email</th>
+<th>Rol</th>
+<th>Activo</th>
+<th>Acciones</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for usuario in usuarios %}
+
+<tr>
+
+<td>{{ usuario.username }}</td>
+
+<td>{{ usuario.email|default:"-" }}</td>
+
+<td>
+
+<span class="role-badge
+{% if usuario.role == 'admin' %}role-admin
+{% elif usuario.role == 'cajero' %}role-cajero
+{% elif usuario.role == 'vendedor' %}role-vendedor
+{% elif usuario.role == 'vigilante' %}role-vigilante
+{% else %}role-default
+{% endif %}
+">
+{{ usuario.role|capfirst }}
+</span>
+
+</td>
+
+<td>
+
+{% if usuario.is_active %}
+<span class="badge-active">Activo</span>
+{% else %}
+<span class="badge-inactive">Inactivo</span>
+{% endif %}
+
+</td>
+
+<td>
+
+<a href="{% url 'admin_usuario_editar' usuario.id %}" class="btn btn-edit btn-sm">
+<i class="bi bi-pencil"></i>
+</a>
+
+{% if usuario != request.user %}
+<a href="{% url 'admin_usuario_eliminar' usuario.id %}" class="btn btn-delete btn-sm">
+<i class="bi bi-trash"></i>
+</a>
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% else %}
+
+<div class="alert alert-info text-center py-5">
+<i class="bi bi-people display-1 text-muted mb-3 d-block"></i>
+<h5>No hay usuarios registrados</h5>
+<p>Crea nuevos usuarios para el sistema.</p>
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 {% endblock %}
