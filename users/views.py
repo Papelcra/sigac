@@ -8,18 +8,14 @@ from django.db.models import Sum, Count
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 
-# Importar WeasyPrint de forma segura: si faltan las bibliotecas
-# nativas (p.ej. gobject/cairo en Windows), evitamos que la
-# importación en el arranque bloquee `runserver`.
-try:
-    from weasyprint import HTML
-except Exception:
-    HTML = None
+# Para PDF con xhtml2pdf (nueva librería estable)
+from xhtml2pdf import pisa
 
 # Modelos usados
 from cinema.models import Movie, Show, Room, Ticket, ShowSeat
 from .models import User  # comenta si usas el User default de Django
 from .forms import MovieForm, ShowForm
+
 
 # Vista raíz: redirige según rol
 def home(request):
@@ -247,7 +243,7 @@ def admin_funcion_eliminar(request, funcion_id):
     return render(request, 'users/admin_funcion_confirm_delete.html', {'funcion': funcion})
 
 
-# Gestión de salas (ya lo tienes, lo incluyo completo)
+# Gestión de salas
 @login_required
 def admin_salas(request):
     if request.user.role != 'admin':
@@ -328,7 +324,7 @@ def admin_sala_eliminar(request, sala_id):
     return render(request, 'users/admin_sala_confirm_delete.html', {'sala': sala})
 
 
-# Gestión de usuarios (ya lo tienes, incluido completo)
+# Gestión de usuarios
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import update_session_auth_hash
 
@@ -492,7 +488,6 @@ def export_reportes_pdf(request):
     start_of_week = today - timezone.timedelta(days=today.weekday())
     start_of_month = today.replace(day=1)
 
-    # Cálculos de reportes
     ventas_dia = Ticket.objects.filter(purchase_date__date=today, status='paid')
     total_dia = ventas_dia.aggregate(total=Sum('price'))['total'] or 0
     boletos_dia = ventas_dia.count()
@@ -515,7 +510,6 @@ def export_reportes_pdf(request):
         ingresos=Sum('price')
     ).order_by('-boletos')[:5]
 
-    # Renderizar el template PDF
     html_string = render_to_string('users/admin_reportes_pdf.html', {
         'total_dia': total_dia,
         'boletos_dia': boletos_dia,
@@ -526,15 +520,18 @@ def export_reportes_pdf(request):
         'today': today,
     })
 
-    if HTML is None:
-        messages.error(request, "WeasyPrint no está disponible. Instala sus dependencias nativas o ejecuta este endpoint en un entorno donde WeasyPrint funcione.")
-        return redirect('admin_reportes')
-
-    html = HTML(string=html_string, base_url=request.build_absolute_uri())
-    pdf = html.write_pdf()
-
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="reporte_ventas_sigac.pdf"'
-    response.write(pdf)
+
+    # Generar PDF con xhtml2pdf
+    pisa_status = pisa.CreatePDF(
+        src=html_string,
+        dest=response,
+        encoding='utf-8'
+    )
+
+    if pisa_status.err:
+        messages.error(request, "Error al generar el PDF. Revisa el contenido o instala xhtml2pdf correctamente.")
+        return redirect('admin_reportes')
 
     return response
