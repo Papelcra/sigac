@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Venta de Productos{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+<div class="card shadow-xl p-4">
+
+<h3 class="text-center mb-4">
+🍿 Venta de Productos
+</h3>
+
+{% if error %}
+<div class="alert alert-danger text-center">
+{{ error }}
+</div>
+{% endif %}
+
+{% if mensaje %}
+<div class="alert alert-success text-center">
+{{ mensaje }}
+</div>
+{% endif %}
+
+<form method="post">
+
+{% csrf_token %}
+
+<div class="row g-3">
+
+<div class="col-md-6">
+
+<label class="form-label">Producto</label>
+
+<select name="producto" class="form-select">
+
+<option value="">Seleccione un producto</option>
+
+{% for producto in productos %}
+
+<option value="{{producto.id}}">
+{{producto.nombre}} - ${{producto.precio}} (Stock: {{producto.stock}})
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-6">
+
+<label class="form-label">Cantidad</label>
+
+<input type="number"
+name="cantidad"
+class="form-control"
+min="1"
+placeholder="Cantidad">
+
+</div>
+
+</div>
+
+<div class="text-center mt-4">
+
+<button class="btn btn-lg"
+style="background: linear-gradient(45deg,#c77dff,#9d4edd); border:none; color:white;">
+
+💰 Registrar Venta
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+{% endblock %}
