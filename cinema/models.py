@@ -214,3 +214,20 @@ class TurnoCaja(models.Model):
 
     class Meta:
         ordering = ['-fecha_inicio']
+
+class Producto(models.Model):
+    nombre = models.CharField(max_length=100)
+    precio = models.DecimalField(max_digits=8, decimal_places=2)
+    stock = models.IntegerField()
+
+    def __str__(self):
+        return self.nombre
+
+
+class Combo(models.Model):
+    nombre = models.CharField(max_length=100)
+    precio = models.DecimalField(max_digits=8, decimal_places=2)
+    productos = models.ManyToManyField(Producto)
+
+    def __str__(self):
+        return self.nombre

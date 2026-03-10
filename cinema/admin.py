@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Movie, Room, Seat, Show, ShowSeat, Ticket
+from .models import Movie, Room, Seat, Show, ShowSeat, Ticket, Producto, Combo
 
 
 @admin.register(Movie)
@@ -62,3 +62,6 @@ class TicketAdmin(admin.ModelAdmin):
     search_fields = ('uuid', 'user__username', 'show_seat__show__movie__title')
     date_hierarchy = 'purchase_date'
     readonly_fields = ('uuid', 'purchase_date')
+
+admin.site.register(Producto)
+admin.site.register(Combo)

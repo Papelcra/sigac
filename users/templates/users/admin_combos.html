@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Combos{% endblock %}
+
+{% block content %}
+
+<style>
+
+.combo-panel{
+background: linear-gradient(145deg,#141424,#1c1c35);
+border-radius:16px;
+padding:35px;
+box-shadow:0 10px 30px rgba(0,0,0,0.6);
+color:#e4e4ff;
+}
+
+.combo-title{
+color:#9d8cff;
+font-weight:600;
+letter-spacing:1px;
+}
+
+.combo-table{
+color:#eaeaff;
+}
+
+.combo-table thead{
+background:linear-gradient(90deg,#5a4bff,#7a6bff,#3f6bff);
+color:white;
+}
+
+.combo-table tbody tr{
+background:#1e1e34;
+transition:0.2s;
+}
+
+.combo-table tbody tr:hover{
+background:#27274a;
+}
+
+.product-tag{
+display:inline-block;
+background:#2f2f55;
+color:#c7c7ff;
+padding:4px 10px;
+border-radius:8px;
+font-size:13px;
+margin:2px;
+}
+
+.btn-combo{
+background:linear-gradient(90deg,#6a5cff,#4b6cff);
+border:none;
+color:white;
+font-weight:500;
+}
+
+.btn-combo:hover{
+opacity:0.9;
+}
+
+.btn-edit{
+background:#4c6fff;
+border:none;
+}
+
+.btn-delete{
+background:#ff4d6d;
+border:none;
+}
+
+</style>
+
+
+<div class="container mt-5">
+
+<div class="combo-panel">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+<h2 class="combo-title">Combos de Confitería</h2>
+
+<a href="{% url 'crear_combo' %}" class="btn btn-combo">
++ Nuevo Combo
+</a>
+
+</div>
+
+<table class="table combo-table align-middle">
+
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Precio</th>
+<th>Productos</th>
+<th>Acciones</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for combo in combos %}
+
+<tr>
+
+<td>
+<strong>{{ combo.nombre }}</strong>
+</td>
+
+<td>
+<span style="color:#7ef9a0;font-weight:600;">
+${{ combo.precio }}
+</span>
+</td>
+
+<td>
+
+{% for producto in combo.productos.all %}
+
+<span class="product-tag">
+{{ producto.nombre }}
+</span>
+
+{% endfor %}
+
+</td>
+
+<td>
+
+<a href="{% url 'editar_combo' combo.id %}" class="btn btn-edit btn-sm me-2">
+✏ Editar
+</a>
+
+<a href="{% url 'eliminar_combo' combo.id %}" class="btn btn-delete btn-sm">
+🗑 Eliminar
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}
