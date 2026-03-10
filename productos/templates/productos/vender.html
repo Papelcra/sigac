@@ -1,84 +1,272 @@
 {% extends "base.html" %}
 
-{% block title %}Venta de Productos{% endblock %}
-
 {% block content %}
 
 <div class="container mt-5">
 
-<div class="card shadow-xl p-4">
+<h2 class="text-center text-light mb-4"> Sistema de Ventas</h2>
 
-<h3 class="text-center mb-4">
-🍿 Venta de Productos
-</h3>
-
-{% if error %}
-<div class="alert alert-danger text-center">
-{{ error }}
-</div>
-{% endif %}
-
-{% if mensaje %}
-<div class="alert alert-success text-center">
-{{ mensaje }}
-</div>
-{% endif %}
-
-<form method="post">
-
-{% csrf_token %}
+<div class="card shadow-lg p-4">
 
 <div class="row g-3">
 
-<div class="col-md-6">
-
+<div class="col-md-5">
 <label class="form-label">Producto</label>
 
-<select name="producto" class="form-select">
-
-<option value="">Seleccione un producto</option>
+<select id="producto" class="form-select" onchange="mostrarStock()">
 
 {% for producto in productos %}
+<option 
+value="{{ producto.id }}"
+data-nombre="{{ producto.nombre }}"
+data-precio="{{ producto.precio|floatformat:0 }}"
+data-stock="{{ producto.stock }}">
 
-<option value="{{producto.id}}">
-{{producto.nombre}} - ${{producto.precio}} (Stock: {{producto.stock}})
+{{ producto.nombre }} - ${{ producto.precio }}
+
 </option>
-
 {% endfor %}
 
 </select>
 
+<div class="mt-2">
+<span class="badge bg-secondary" id="stockDisponible">
+Stock disponible: -
+</span>
+</div>
+
+</div>
+
+<div class="col-md-3">
+<label class="form-label">Cantidad</label>
+<input type="number" id="cantidad" class="form-control" value="1" min="1">
+</div>
+
+<div class="col-md-4 d-flex align-items-end">
+
+<button onclick="agregarProducto()" class="btn btn-success w-100">
+Agregar
+</button>
+
+</div>
+
+</div>
+
+<hr>
+
+<h4>🧾 Carrito</h4>
+
+<div style="max-height:300px; overflow-y:auto;">
+
+<table class="table table-striped">
+
+<thead>
+<tr>
+<th>Producto</th>
+<th>Cantidad</th>
+<th>Precio</th>
+<th>Total</th>
+<th></th>
+</tr>
+</thead>
+
+<tbody id="carrito"></tbody>
+
+</table>
+
+</div>
+
+<h3 class="text-end">
+Total: $<span id="total">0</span>
+</h3>
+
+<hr>
+
+<div class="row mt-3">
+
+<div class="col-md-6">
+<label class="form-label">💵 Cliente paga</label>
+<input type="number" id="pagoCliente" class="form-control" oninput="calcularCambio()">
 </div>
 
 <div class="col-md-6">
-
-<label class="form-label">Cantidad</label>
-
-<input type="number"
-name="cantidad"
-class="form-control"
-min="1"
-placeholder="Cantidad">
-
+<label class="form-label">💰 Cambio</label>
+<input type="text" id="cambio" class="form-control" readonly value="$0">
 </div>
 
 </div>
 
-<div class="text-center mt-4">
+<form method="POST" id="formVenta">
+{% csrf_token %}
+<input type="hidden" name="carrito" id="carritoInput">
 
-<button class="btn btn-lg"
-style="background: linear-gradient(45deg,#c77dff,#9d4edd); border:none; color:white;">
-
-💰 Registrar Venta
-
+<div class="text-end mt-4">
+<button type="button" onclick="finalizarVenta()" class="btn btn-primary">
+💰 Finalizar venta
 </button>
-
 </div>
 
 </form>
 
 </div>
-
 </div>
+
+<script>
+
+let carrito = []
+
+function mostrarStock(){
+
+let select = document.getElementById("producto")
+let stock = select.options[select.selectedIndex].dataset.stock
+
+document.getElementById("stockDisponible").innerText =
+"Stock disponible: " + stock
+
+}
+
+function agregarProducto(){
+
+let select = document.getElementById("producto")
+
+let id = select.value
+let nombre = select.options[select.selectedIndex].dataset.nombre
+let precio = parseFloat(select.options[select.selectedIndex].dataset.precio)
+let stock = parseInt(select.options[select.selectedIndex].dataset.stock)
+
+let cantidad = parseInt(document.getElementById("cantidad").value)
+
+if(cantidad <= 0){
+
+alert("Cantidad inválida")
+return
+
+}
+
+let cantidadEnCarrito = 0
+
+carrito.forEach(item => {
+
+if(item.id == id){
+
+cantidadEnCarrito += item.cantidad
+
+}
+
+})
+
+if(cantidad + cantidadEnCarrito > stock){
+
+alert("No hay suficiente stock disponible")
+return
+
+}
+
+let subtotal = precio * cantidad
+
+carrito.push({
+id,
+nombre,
+precio,
+cantidad,
+subtotal
+})
+
+renderCarrito()
+
+document.getElementById("cantidad").value = 1
+
+}
+
+function eliminarProducto(index){
+
+carrito.splice(index,1)
+
+renderCarrito()
+
+}
+
+function renderCarrito(){
+
+let tbody = document.getElementById("carrito")
+
+tbody.innerHTML=""
+
+let total = 0
+
+carrito.forEach((item,index)=>{
+
+total += item.subtotal
+
+tbody.innerHTML += `
+<tr>
+<td>${item.nombre}</td>
+<td>${item.cantidad}</td>
+<td>$${item.precio}</td>
+<td>$${item.subtotal}</td>
+<td>
+<button type="button" class="btn btn-sm btn-danger"
+onclick="eliminarProducto(${index})">
+❌
+</button>
+</td>
+</tr>
+`
+
+})
+
+document.getElementById("total").innerText = total
+
+calcularCambio()
+
+}
+
+function calcularCambio(){
+
+let total = parseFloat(document.getElementById("total").innerText) || 0
+let pago = parseFloat(document.getElementById("pagoCliente").value) || 0
+
+let cambio = pago - total
+
+if(cambio < 0){
+
+document.getElementById("cambio").value = "Falta $" + Math.abs(cambio)
+
+}else{
+
+document.getElementById("cambio").value = "$" + cambio
+
+}
+
+}
+
+function finalizarVenta(){
+
+if(carrito.length == 0){
+
+alert("Debe agregar productos")
+return
+
+}
+
+let total = parseFloat(document.getElementById("total").innerText)
+let pago = parseFloat(document.getElementById("pagoCliente").value) || 0
+
+if(pago < total){
+
+alert("El dinero no es suficiente")
+return
+
+}
+
+document.getElementById("carritoInput").value = JSON.stringify(carrito)
+
+document.getElementById("formVenta").submit()
+
+}
+
+mostrarStock()
+
+</script>
 
 {% endblock %}

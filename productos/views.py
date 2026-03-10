@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Producto, VentaProducto
+import json
+
 
 
 def lista_productos(request):
@@ -10,53 +12,34 @@ def lista_productos(request):
     })
 
 
+
+
 def vender_producto(request):
 
     productos = Producto.objects.filter(activo=True)
 
     if request.method == "POST":
 
-        producto_id = request.POST.get("producto")
-        cantidad = request.POST.get("cantidad")
+        carrito = json.loads(request.POST.get("carrito"))
 
-        if not producto_id or not cantidad:
-            return render(request, "productos/vender.html", {
-                "productos": productos,
-                "error": "Debe seleccionar producto y cantidad"
-            })
+        for item in carrito:
 
-        try:
-            producto = Producto.objects.get(id=producto_id)
-        except Producto.DoesNotExist:
-            return render(request, "productos/vender.html", {
-                "productos": productos,
-                "error": "El producto no existe"
-            })
+            producto = Producto.objects.get(id=item["id"])
 
-        cantidad = int(cantidad)
+            VentaProducto.objects.create(
+                producto=producto,
+                cantidad=item["cantidad"],
+                total=item["subtotal"]
+            )
 
-        if producto.stock < cantidad:
-            return render(request, "productos/vender.html", {
-                "productos": productos,
-                "error": "No hay suficiente stock"
-            })
+            producto.stock -= item["cantidad"]
+            producto.save()
 
-        total = producto.precio * cantidad
-
-        VentaProducto.objects.create(
-            producto=producto,
-            cantidad=cantidad,
-            total=total
-        )
-
-        producto.stock -= cantidad
-        producto.save()
-
-        return render(request, "productos/vender.html", {
-            "productos": productos,
-            "mensaje": "Venta realizada correctamente 🎉"
+        return render(request,"productos/vender.html",{
+            "productos":productos,
+            "mensaje":"Venta registrada correctamente"
         })
 
-    return render(request, "productos/vender.html", {
-        "productos": productos
+    return render(request,"productos/vender.html",{
+        "productos":productos
     })
