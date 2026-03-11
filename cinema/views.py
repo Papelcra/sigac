@@ -5,9 +5,11 @@ from datetime import timedelta
 from django.contrib import messages
 from .models import Show, ShowSeat, Ticket, TurnoCaja
 from django.template.loader import render_to_string
-import os
 from django.http import HttpResponse
 from django.db.models import Sum
+
+# Librería para generar PDF (estable en Render y local)
+from xhtml2pdf import pisa
 
 
 def clear_expired_reservations():
@@ -200,25 +202,22 @@ def download_ticket_pdf(request, ticket_id):
     if not ticket.qr_code:
         ticket.generate_qr()
 
-    # Renderizar el HTML del ticket (reutilizamos o creamos uno específico para PDF)
+    # Renderizar el HTML del ticket
     html_string = render_to_string('cinema/ticket_pdf.html', {'ticket': ticket})
 
-    # Intentar importar WeasyPrint en tiempo de ejecución; si falta
-    # (p. ej. en Windows sin runtime GTK), evitar romper el arranque.
-    try:
-        from weasyprint import HTML
-    except Exception:
-        messages.error(request, "La generación de PDF no está disponible en este entorno (WeasyPrint faltante).")
-        return redirect('ticket_detail', ticket_id=ticket.id)
-
-    # Crear PDF
-    html = HTML(string=html_string, base_url=request.build_absolute_uri())
-    pdf_file = html.write_pdf()
-
-    # Respuesta como descarga
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="ticket_{ticket.uuid}.pdf"'
-    response.write(pdf_file)
+
+    # Generar PDF con xhtml2pdf
+    pisa_status = pisa.CreatePDF(
+        src=html_string,
+        dest=response,
+        encoding='utf-8'
+    )
+
+    if pisa_status.err:
+        messages.error(request, "Error al generar el PDF del ticket. Revisa el contenido.")
+        return redirect('ticket_detail', ticket_id=ticket.id)
 
     return response
 
@@ -260,13 +259,13 @@ def validate_ticket(request):
     context['ticket'] = ticket
     return render(request, 'cinema/validate_ticket.html', context)
 
+
 @login_required
 def cierre_caja(request):
     if request.user.role != 'cajero':
         messages.error(request, "Acceso solo para cajeros.")
         return redirect('home')
 
-    # Ventas del día actual (puedes ajustar a turno)
     today = timezone.now().date()
     boletos_hoy = Ticket.objects.filter(
         purchase_date__date=today,
@@ -276,7 +275,6 @@ def cierre_caja(request):
     total_ingresos = boletos_hoy.aggregate(total=Sum('price'))['total'] or 0
     num_boletos = boletos_hoy.count()
 
-    # Último turno abierto del cajero (si existe)
     turno_abierto = TurnoCaja.objects.filter(
         cajero=request.user,
         cerrado=False
@@ -293,7 +291,6 @@ def cierre_caja(request):
                 turno_abierto.save()
                 messages.success(request, f"Turno cerrado correctamente. Total: ${total_ingresos:,.2f}")
             else:
-                # Crear nuevo turno si no había
                 TurnoCaja.objects.create(
                     cajero=request.user,
                     total_ventas=total_ingresos,
