@@ -3,89 +3,283 @@
 {% block title %}Dashboard - Cajero{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Panel del Cajero</h1>
-    
-    <div class="alert alert-success text-center mb-5" role="alert">
-        <h4 class="alert-heading">¡Bienvenido, {{ user.username }}!</h4>
-        <p>Estás en modo Cajero. Aquí puedes confirmar pagos y procesar ventas de boletos.</p>
-    </div>
 
-    <!-- Resumen rápido del día -->
-    <div class="card shadow mb-5 bg-light">
-        <div class="card-body text-center">
-            <h5 class="card-title">Resumen del día ({{ today|date:"d/m/Y" }})</h5>
-            <div class="row mt-3">
-                <div class="col-md-4">
-                    <h3 class="text-success">{{ boletos_hoy|default:0 }}</h3>
-                    <p class="text-muted">Boletos vendidos hoy</p>
-                </div>
-                <div class="col-md-4">
-                    <h3 class="text-primary">${{ total_hoy|default:"0.00"|floatformat:2 }}</h3>
-                    <p class="text-muted">Ingresos totales hoy</p>
-                </div>
-                <div class="col-md-4">
-                    <h3 class="text-warning">{{ reservas_pendientes|default:0 }}</h3>
-                    <p class="text-muted">Reservas pendientes</p>
-                </div>
-            </div>
-        </div>
-    </div>
+<style>
 
-    <!-- Tarjetas de acciones rápidas -->
-    <div class="row g-4">
-        <!-- Confirmar reservas pendientes -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card shadow h-100 border-primary">
-                <div class="card-body text-center d-flex flex-column justify-content-center">
-                    <i class="bi bi-clock-history display-4 text-primary mb-3"></i>
-                    <h5 class="card-title">Reservas Pendientes</h5>
-                    <p class="card-text">Revisa y confirma pagos de asientos reservados temporalmente.</p>
-                    <a href="{% url 'pending_reservations' %}" class="btn btn-primary btn-lg w-100 mt-auto">
-                        Ver Reservas Pendientes
-                    </a>
-                </div>
-            </div>
-        </div>
+.dashboard-bg{
+background: radial-gradient(circle at top,#3b2a57,#1b1328 70%);
+min-height:100vh;
+padding:40px 0;
+color:#eae6ff;
+}
 
-        <!-- Venta rápida de boletos -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card shadow h-100 border-success">
-                <div class="card-body text-center d-flex flex-column justify-content-center">
-                    <i class="bi bi-ticket-perforated display-4 text-success mb-3"></i>
-                    <h5 class="card-title">Venta Rápida</h5>
-                    <p class="card-text">Busca una función y vende boletos directamente en taquilla.</p>
-                    <a href="{% url 'movie_list' %}" class="btn btn-success btn-lg w-100 mt-auto">
-                        Ir a Cartelera
-                    </a>
-                </div>
-            </div>
-        </div>
+/* TITULO */
 
-        <!-- Cierre de caja -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card shadow h-100 border-danger">
-                <div class="card-body text-center d-flex flex-column justify-content-center">
-                    <i class="bi bi-cash-stack display-4 text-danger mb-3"></i>
-                    <h5 class="card-title">Cierre de Caja</h5>
-                    <p class="card-text">Registra el corte de turno y genera reporte del día.</p>
-                    <a href="{% url 'cierre_caja' %}" class="btn btn-danger btn-lg w-100 mt-auto">
-                        Cerrar Caja Ahora
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+.dashboard-title{
+font-weight:700;
+letter-spacing:1px;
+color:#f1ecff;
+}
 
-    <!-- Espacio para futuras secciones -->
-    <div class="mt-5">
-        <h4 class="text-center mb-4 text-muted">Otras acciones</h4>
-        <div class="d-flex justify-content-center gap-3 flex-wrap">
-            <button class="btn btn-outline-secondary btn-lg px-4" disabled>Ver Historial de Ventas</button>
-            <button class="btn btn-outline-secondary btn-lg px-4" disabled>Imprimir Reporte</button>
-        </div>
-    </div>
+/* ALERT BIENVENIDA */
+
+.alert-cajero{
+background:linear-gradient(135deg,#7c5cff,#5a3fc9);
+border:none;
+color:white;
+border-radius:12px;
+box-shadow:0 6px 20px rgba(0,0,0,0.4);
+}
+
+/* RESUMEN DEL DIA */
+
+.resumen-card{
+background:#241a38;
+border:none;
+border-radius:16px;
+box-shadow:0 8px 25px rgba(0,0,0,0.4);
+color:#eee;
+}
+
+.resumen-numero{
+font-size:2rem;
+font-weight:700;
+}
+
+.resumen-texto{
+color:#bfb8dd;
+}
+
+/* TARJETAS */
+
+.accion-card{
+background:#241a38;
+border:none;
+border-radius:16px;
+box-shadow:0 8px 25px rgba(0,0,0,0.45);
+transition:all .25s ease;
+}
+
+.accion-card:hover{
+transform:translateY(-6px);
+box-shadow:0 12px 35px rgba(0,0,0,0.6);
+}
+
+.accion-card i{
+font-size:3rem;
+}
+
+.accion-card p{
+color:#bfb8dd;
+}
+
+/* BOTONES */
+
+.btn-primary{
+background:#7c5cff;
+border:none;
+}
+
+.btn-primary:hover{
+background:#9276ff;
+}
+
+.btn-success{
+background:#3bc48a;
+border:none;
+}
+
+.btn-success:hover{
+background:#57d6a1;
+}
+
+.btn-danger{
+background:#ff5c7c;
+border:none;
+}
+
+.btn-danger:hover{
+background:#ff7894;
+}
+
+/* SECCION EXTRA */
+
+.extra-title{
+color:#bfb8dd;
+}
+
+</style>
+
+
+<div class="dashboard-bg">
+
+<div class="container">
+
+<h1 class="text-center mb-4 dashboard-title">
+Panel del Cajero
+</h1>
+
+
+<div class="alert alert-cajero text-center mb-5">
+<h4 class="mb-2">¡Bienvenido, {{ user.username }}!</h4>
+<p class="mb-0">
+Estás en modo Cajero. Aquí puedes confirmar pagos y procesar ventas de boletos.
+</p>
+</div>
+
+
+<!-- RESUMEN DEL DIA -->
+
+<div class="card resumen-card mb-5">
+<div class="card-body text-center">
+
+<h5 class="mb-4">
+Resumen del día ({{ today|date:"d/m/Y" }})
+</h5>
+
+<div class="row">
+
+<div class="col-md-4">
+<div class="resumen-numero text-success">
+{{ boletos_hoy|default:0 }}
+</div>
+<div class="resumen-texto">
+Boletos vendidos hoy
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="resumen-numero text-info">
+${{ total_hoy|default:"0.00"|floatformat:2 }}
+</div>
+<div class="resumen-texto">
+Ingresos totales hoy
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="resumen-numero text-warning">
+{{ reservas_pendientes|default:0 }}
+</div>
+<div class="resumen-texto">
+Reservas pendientes
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+
+<!-- ACCIONES RAPIDAS -->
+
+<div class="row g-4">
+
+<div class="col-md-6 col-lg-4">
+
+<div class="card accion-card h-100">
+
+<div class="card-body text-center d-flex flex-column justify-content-center">
+
+<i class="bi bi-clock-history text-primary mb-3"></i>
+
+<h5 class="card-title">
+Reservas Pendientes
+</h5>
+
+<p>
+Revisa y confirma pagos de asientos reservados temporalmente.
+</p>
+
+<a href="{% url 'pending_reservations' %}" 
+class="btn btn-primary btn-lg w-100 mt-auto">
+Ver Reservas
+</a>
+
+</div>
+</div>
+</div>
+
+
+<div class="col-md-6 col-lg-4">
+
+<div class="card accion-card h-100">
+
+<div class="card-body text-center d-flex flex-column justify-content-center">
+
+<i class="bi bi-ticket-perforated text-success mb-3"></i>
+
+<h5 class="card-title">
+Venta Rápida
+</h5>
+
+<p>
+Busca una función y vende boletos directamente en taquilla.
+</p>
+
+<a href="{% url 'movie_list' %}" 
+class="btn btn-success btn-lg w-100 mt-auto">
+Ir a Cartelera
+</a>
+
+</div>
+</div>
+</div>
+
+
+<div class="col-md-6 col-lg-4">
+
+<div class="card accion-card h-100">
+
+<div class="card-body text-center d-flex flex-column justify-content-center">
+
+<i class="bi bi-cash-stack text-danger mb-3"></i>
+
+<h5 class="card-title">
+Cierre de Caja
+</h5>
+
+<p>
+Registra el corte de turno y genera reporte del día.
+</p>
+
+<a href="{% url 'cierre_caja' %}" 
+class="btn btn-danger btn-lg w-100 mt-auto">
+Cerrar Caja
+</a>
+
+</div>
+</div>
+</div>
+
+</div>
+
+
+<!-- SECCION FUTURA -->
+
+<div class="mt-5 text-center">
+
+<h4 class="extra-title mb-4">
+Otras acciones
+</h4>
+
+<div class="d-flex justify-content-center gap-3 flex-wrap">
+
+<button class="btn btn-outline-light btn-lg px-4" disabled>
+Ver Historial de Ventas
+</button>
+
+<button class="btn btn-outline-light btn-lg px-4" disabled>
+Imprimir Reporte
+</button>
+
+</div>
+
+</div>
+
+</div>
 </div>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 {% endblock %}

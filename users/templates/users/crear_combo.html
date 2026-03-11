@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Combo{% endblock %}
+
+{% block content %}
+
+<style>
+
+.combo-card{
+background:#1b1b2f;
+border-radius:15px;
+padding:25px;
+box-shadow:0 10px 25px rgba(0,0,0,0.5);
+color:white;
+}
+
+.producto-card{
+background:#242447;
+border-radius:12px;
+padding:15px;
+text-align:center;
+cursor:pointer;
+transition:0.2s;
+border:2px solid transparent;
+}
+
+.producto-card:hover{
+border-color:#6a5cff;
+transform:scale(1.03);
+}
+
+.producto-card input{
+display:none;
+}
+
+.producto-card.selected{
+border-color:#7a6bff;
+background:#2d2d5e;
+}
+
+.combo-btn{
+background:linear-gradient(90deg,#6a5cff,#4b6cff);
+border:none;
+color:white;
+font-weight:600;
+}
+
+</style>
+
+
+<div class="container mt-5">
+
+<div class="combo-card">
+
+<h2 class="mb-4">Crear nuevo Combo</h2>
+
+<form method="POST">
+{% csrf_token %}
+
+<div class="mb-4">
+<label class="form-label">Nombre del combo</label>
+<input type="text" name="nombre" class="form-control">
+</div>
+
+<h5 class="mb-3">Selecciona los productos</h5>
+
+<div class="row g-3">
+
+{% for producto in productos %}
+
+<div class="col-md-3">
+
+<label class="producto-card">
+
+<input type="checkbox" name="productos" value="{{ producto.id }}">
+
+<h6>{{ producto.nombre }}</h6>
+
+<p style="color:#8cf5a4">
+${{ producto.precio }}
+</p>
+
+</label>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<button class="btn combo-btn mt-4">
+Crear Combo
+</button>
+
+<a href="{% url 'admin_combos' %}" class="btn btn-secondary mt-4">
+Cancelar
+</a>
+
+</form>
+
+</div>
+
+</div>
+
+
+<script>
+
+document.querySelectorAll(".producto-card").forEach(card => {
+
+card.addEventListener("click", function(){
+
+this.classList.toggle("selected")
+
+let checkbox = this.querySelector("input")
+checkbox.checked = !checkbox.checked
+
+})
+
+})
+
+</script>
+
+{% endblock %}

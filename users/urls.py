@@ -1,5 +1,6 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
+from cinema.views import cliente_dashboard
 from .views import (
     CustomLoginView,
     home,
@@ -7,7 +8,6 @@ from .views import (
     cajero_dashboard,
     vendedor_dashboard,
     vigilante_dashboard,
-    cliente_dashboard,
     # Vistas para películas (CRUD completo)
     admin_peliculas,admin_pelicula_crear,admin_pelicula_editar,admin_pelicula_eliminar,
     # Vistas para las otras secciones (puedes agregar más después)

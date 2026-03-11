@@ -7,11 +7,25 @@ from .models import Show, ShowSeat, Ticket, TurnoCaja
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.db.models import Sum
-
 # Librería para generar PDF (estable en Render y local)
 from xhtml2pdf import pisa
 
+# Para confitería y precios precisos (de la rama de tu compañera)
+from decimal import Decimal
+from .models import Producto, Combo, VentaConfiteria, DetalleVentaConfiteria
 
+
+def clear_expired_reservations():
+    """Libera automáticamente reservas vencidas (estado 'reservado' pasado el tiempo)."""
+    now = timezone.now()
+    expired = ShowSeat.objects.filter(
+        status='reservado',
+        reserved_until__lt=now
+    )
+    count = expired.count()
+    if count > 0:
+        expired.update(status='disponible', reserved_until=None, reserved_by=None)
+        print(f"[AUTO] Liberados {count} asientos vencidos.")  # debug en consola
 def clear_expired_reservations():
     """Libera automáticamente reservas vencidas (estado 'reservado' pasado el tiempo)."""
     now = timezone.now()
@@ -308,3 +322,231 @@ def cierre_caja(request):
         'boletos_hoy': boletos_hoy,
     }
     return render(request, 'cinema/cierre_caja.html', context)
+
+
+@login_required
+def vendedor_dashboard(request):
+    # Asegúrate de usar el modelo correcto
+    lista_productos = Producto.objects.all() 
+    lista_combos = Combo.objects.all()
+    return render(request, "users/vendedor_dashboard.html",{
+    'productos': lista_productos,
+    'combos': lista_combos,
+})
+
+@login_required
+def vender_producto(request, id):
+
+    producto = get_object_or_404(Producto, id=id)
+
+    if request.method == "POST":
+
+        if producto.stock <= 0:
+            messages.error(request, "No hay stock disponible")
+            return redirect("vendedor_dashboard")
+
+        producto.stock -= 1
+        producto.save()
+
+        messages.success(request, f"Se vendió {producto.nombre}")
+
+    return redirect("vendedor_dashboard")
+
+@login_required
+def vender_combo(request, id):
+
+    combo = get_object_or_404(Combo, id=id)
+
+    if request.method == "POST":
+
+        for producto in combo.productos.all():
+
+            if producto.stock <= 0:
+                messages.error(request, f"No hay stock de {producto.nombre}")
+                return redirect("vendedor_dashboard")
+
+        for producto in combo.productos.all():
+            producto.stock -= 1
+            producto.save()
+
+        messages.success(request, f"Se vendió el combo {combo.nombre}")
+
+    return redirect("vendedor_dashboard")
+
+from .models import CompraCombo
+
+@login_required
+def cliente_dashboard(request):
+
+    if request.user.role != 'cliente':
+        messages.error(request, "Acceso no autorizado.")
+        return redirect('home')
+
+    tickets = Ticket.objects.filter(
+        user=request.user,
+        status__in=['paid', 'used']
+    ).select_related(
+        'show_seat__show__movie',
+        'show_seat__seat'
+    ).order_by('-purchase_date')
+
+    combos = Combo.objects.all()
+
+    # CONSULTAR COMBOS COMPRADOS
+    combos_comprados = CompraCombo.objects.filter(
+        usuario=request.user
+    ).select_related('combo').order_by('-fecha')
+
+    context = {
+        'tickets': tickets,
+        'combos': combos,
+        'combos_comprados': combos_comprados
+    }
+
+    return render(request, 'users/cliente_dashboard.html', context)
+
+
+def admin_productos(request):
+
+    productos = Producto.objects.all()
+
+    return render(request, 'users/admin_productos.html', {
+        'productos': productos
+    })
+
+
+def admin_combos(request):
+    combos = Combo.objects.all()
+
+    return render(request, 'users/admin_combos.html', {
+        'combos': combos
+    })
+
+@login_required
+def crear_producto(request):
+
+    if request.method == "POST":
+        nombre = request.POST.get("nombre")
+        precio = request.POST.get("precio")
+        stock = request.POST.get("stock")
+
+        Producto.objects.create(
+            nombre=nombre,
+            precio=precio,
+            stock=stock
+        )
+
+        messages.success(request, "Producto creado correctamente.")
+        return redirect("admin_productos")
+
+    return render(request, "users/crear_producto.html")
+
+@login_required
+def editar_producto(request, id):    
+
+    producto = get_object_or_404(Producto, id=id)
+
+    if request.method == "POST":
+        producto.nombre = request.POST.get("nombre")
+        producto.precio = request.POST.get("precio")
+        producto.stock = request.POST.get("stock")
+        producto.save()
+
+        messages.success(request, "Producto actualizado correctamente.")
+        return redirect("admin_productos")
+
+    return render(request, "users/editar_producto.html", {
+        "producto": producto
+    })
+
+@login_required
+def eliminar_producto(request, id):   
+
+    producto = get_object_or_404(Producto, id=id)
+
+    if request.method == "POST":
+        producto.delete()
+        messages.success(request, "Producto eliminado correctamente.")
+        return redirect("admin_productos")
+
+    return render(request, "users/eliminar_producto.html", {
+        "producto": producto
+    })  
+
+@login_required
+def crear_combo(request):
+
+    productos = Producto.objects.all()
+
+    if request.method == "POST":
+
+        nombre = request.POST.get("nombre")
+        productos_ids = request.POST.getlist("productos")
+
+        productos_seleccionados = Producto.objects.filter(id__in=productos_ids)
+
+        total = sum(p.precio for p in productos_seleccionados)
+
+        descuento = Decimal("0.10")  # 10%
+        precio_combo = total * (Decimal("1.00") - descuento)
+
+        combo = Combo.objects.create(
+            nombre=nombre,
+            precio=precio_combo
+        )
+
+        combo.productos.set(productos_seleccionados)
+
+        messages.success(request, "Combo creado correctamente")
+        return redirect("admin_combos")
+
+    return render(request, "users/crear_combo.html", {
+        "productos": productos
+    })
+@login_required
+def editar_combo(request, id):
+
+    combo = get_object_or_404(Combo, id=id)
+    productos = Producto.objects.all()
+
+    if request.method == "POST":
+
+        combo.nombre = request.POST.get("nombre")
+        productos_ids = request.POST.getlist("productos")
+
+        productos_seleccionados = Producto.objects.filter(id__in=productos_ids)
+
+        total = sum(p.precio for p in productos_seleccionados)
+
+        descuento = Decimal("0.10")
+        precio_combo = total * (Decimal("1.00") - descuento)
+
+        combo.precio = precio_combo.quantize(Decimal("0.01"))
+
+        combo.save()
+        combo.productos.set(productos_seleccionados)
+
+        messages.success(request, "Combo actualizado correctamente.")
+        return redirect("admin_combos")
+
+    return render(request, "users/editar_combo.html", {
+        "combo": combo,
+        "productos": productos
+    })
+
+@login_required
+def eliminar_combo(request, id):
+
+    combo = get_object_or_404(Combo, id=id)
+
+    if request.method == "POST":
+        combo.delete()
+        messages.success(request, "Combo eliminado.")
+        return redirect("admin_combos")
+
+    return render(request, "users/eliminar_combo.html", {
+        "combo": combo
+    })
+
+from django.contrib import messages
+

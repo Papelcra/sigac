@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Combo{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+<h2 class="text-danger mb-4">Eliminar Combo</h2>
+
+<div class="alert alert-warning">
+¿Seguro que quieres eliminar el combo <strong>{{ combo.nombre }}</strong>?
+</div>
+
+<p>
+<strong>Productos incluidos:</strong><br>
+
+{% for producto in combo.productos.all %}
+{{ producto.nombre }}<br>
+{% endfor %}
+
+</p>
+
+<form method="POST">
+{% csrf_token %}
+
+<button class="btn btn-danger">
+Eliminar
+</button>
+
+<a href="{% url 'admin_combos' %}" class="btn btn-secondary">
+Cancelar
+</a>
+
+</form>
+
+</div>
+
+{% endblock %}

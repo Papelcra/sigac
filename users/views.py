@@ -7,8 +7,12 @@ from django.utils import timezone
 from django.db.models import Sum, Count
 from django.http import HttpResponse
 from django.template.loader import render_to_string
+# Modelos y forms usados en las vistas
+from .models import User
+from cinema.models import Movie, Show, Room, Ticket, ShowSeat, Producto, Combo, CompraCombo
+from .forms import MovieForm, ShowForm
 
-# Para PDF con xhtml2pdf (nueva librería estable)
+# Para PDF con xhtml2pdf (librería estable en Render y local)
 from xhtml2pdf import pisa
 
 # Modelos usados
@@ -87,12 +91,21 @@ def cajero_dashboard(request):
     return render(request, 'users/cajero_dashboard.html', context)
 
 
+from cinema.models import Producto, Combo
+
 @login_required
 def vendedor_dashboard(request):
+    # Asegúrate de usar el modelo correcto
     if request.user.role != 'vendedor':
         messages.error(request, "Acceso no autorizado.")
         return redirect('home')
-    return render(request, 'users/vendedor_dashboard.html')
+    lista_productos = Producto.objects.all() 
+    lista_combos = Combo.objects.all()
+    return render(request, "users/vendedor_dashboard.html",{
+    'productos': lista_productos,
+    'combos': lista_combos,
+
+})
 
 
 @login_required
@@ -103,22 +116,6 @@ def vigilante_dashboard(request):
     return render(request, 'users/vigilante_dashboard.html')
 
 
-@login_required
-def cliente_dashboard(request):
-    if request.user.role != 'cliente':
-        messages.error(request, "Acceso no autorizado.")
-        return redirect('home')
-
-    tickets = Ticket.objects.filter(
-        user=request.user,
-        status__in=['paid', 'used']
-    ).select_related(
-        'show_seat__show__movie',
-        'show_seat__seat'
-    ).order_by('-purchase_date')
-
-    context = {'tickets': tickets}
-    return render(request, 'users/cliente_dashboard.html', context)
 
 
 # Gestión de películas
@@ -535,3 +532,18 @@ def export_reportes_pdf(request):
         return redirect('admin_reportes')
 
     return response
+
+@login_required
+def comprar_combo(request, combo_id):
+
+    combo = get_object_or_404(Combo, id=combo_id)
+
+    CompraCombo.objects.create(
+        usuario=request.user,
+        combo=combo,
+        precio=combo.precio
+    )
+
+    messages.success(request, "Combo comprado correctamente.")
+
+    return redirect('cliente_dashboard')
