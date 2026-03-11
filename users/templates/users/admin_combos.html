@@ -6,22 +6,63 @@
 
 <style>
 
+/* ===== FONDO GENERAL ===== */
+
+.combo-bg{
+background:
+radial-gradient(circle at top,#3a2c6d,#0c0c14 70%),
+linear-gradient(180deg,#0c0c14,#07070d);
+min-height:100vh;
+padding:50px 20px;
+}
+
+
+/* ===== PANEL ===== */
+
 .combo-panel{
-background: linear-gradient(145deg,#141424,#1c1c35);
-border-radius:16px;
+background:rgba(20,20,40,.9);
+backdrop-filter:blur(12px);
+border-radius:18px;
 padding:35px;
-box-shadow:0 10px 30px rgba(0,0,0,0.6);
+box-shadow:0 20px 50px rgba(0,0,0,.6);
+border:1px solid rgba(140,120,255,.25);
 color:#e4e4ff;
 }
 
+
+/* ===== TITULO ===== */
+
 .combo-title{
-color:#9d8cff;
-font-weight:600;
+color:#c9c2ff;
+font-weight:700;
 letter-spacing:1px;
 }
 
+
+/* ===== BOTON NUEVO COMBO ===== */
+
+.btn-combo{
+background:linear-gradient(135deg,#7b68ee,#9f7aea);
+border:none;
+color:white;
+font-weight:600;
+padding:8px 16px;
+border-radius:10px;
+transition:.2s;
+}
+
+.btn-combo:hover{
+background:linear-gradient(135deg,#9f7aea,#c4b5fd);
+color:#0a0a12;
+}
+
+
+/* ===== TABLA ===== */
+
 .combo-table{
 color:#eaeaff;
+border-collapse:separate;
+border-spacing:0 10px;
 }
 
 .combo-table thead{
@@ -29,62 +70,94 @@ background:linear-gradient(90deg,#5a4bff,#7a6bff,#3f6bff);
 color:white;
 }
 
+.combo-table thead th{
+border:none;
+}
+
 .combo-table tbody tr{
 background:#1e1e34;
-transition:0.2s;
+transition:.2s;
 }
 
 .combo-table tbody tr:hover{
-background:#27274a;
+background:#2a2a4d;
+transform:scale(1.01);
 }
+
+.combo-table td{
+vertical-align:middle;
+border:none;
+padding:15px;
+}
+
+
+/* ===== TAG PRODUCTOS ===== */
 
 .product-tag{
 display:inline-block;
 background:#2f2f55;
 color:#c7c7ff;
-padding:4px 10px;
+padding:5px 10px;
 border-radius:8px;
 font-size:13px;
-margin:2px;
+margin:3px;
+border:1px solid #3a3a70;
 }
 
-.btn-combo{
-background:linear-gradient(90deg,#6a5cff,#4b6cff);
-border:none;
-color:white;
-font-weight:500;
+
+/* ===== PRECIO ===== */
+
+.combo-price{
+color:#34d399;
+font-weight:700;
 }
 
-.btn-combo:hover{
-opacity:0.9;
-}
+
+/* ===== BOTONES ===== */
 
 .btn-edit{
-background:#4c6fff;
+background:#38bdf8;
 border:none;
+color:#081018;
+font-weight:600;
+}
+
+.btn-edit:hover{
+background:#67d4ff;
 }
 
 .btn-delete{
-background:#ff4d6d;
+background:#f43f5e;
 border:none;
+color:white;
+font-weight:600;
+}
+
+.btn-delete:hover{
+background:#ff6a85;
 }
 
 </style>
 
 
-<div class="container mt-5">
+<div class="combo-bg">
+
+<div class="container">
 
 <div class="combo-panel">
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
 
-<h2 class="combo-title">Combos de Confitería</h2>
+<h2 class="combo-title">
+🍿 Combos de Confitería
+</h2>
 
 <a href="{% url 'crear_combo' %}" class="btn btn-combo">
-+ Nuevo Combo
+<i class="bi bi-plus-lg"></i> Nuevo Combo
 </a>
 
 </div>
+
 
 <table class="table combo-table align-middle">
 
@@ -108,7 +181,7 @@ border:none;
 </td>
 
 <td>
-<span style="color:#7ef9a0;font-weight:600;">
+<span class="combo-price">
 ${{ combo.precio }}
 </span>
 </td>
@@ -128,11 +201,11 @@ ${{ combo.precio }}
 <td>
 
 <a href="{% url 'editar_combo' combo.id %}" class="btn btn-edit btn-sm me-2">
-✏ Editar
+<i class="bi bi-pencil"></i> Editar
 </a>
 
 <a href="{% url 'eliminar_combo' combo.id %}" class="btn btn-delete btn-sm">
-🗑 Eliminar
+<i class="bi bi-trash"></i> Eliminar
 </a>
 
 </td>
@@ -148,5 +221,10 @@ ${{ combo.precio }}
 </div>
 
 </div>
+
+</div>
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 {% endblock %}

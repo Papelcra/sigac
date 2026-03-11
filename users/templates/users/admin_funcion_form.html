@@ -5,206 +5,283 @@
 {% block content %}
 
 <style>
-.dashboard-bg {
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+
+/* ===== FONDO GENERAL ===== */
+
+.dashboard-bg{
+background:
+radial-gradient(circle at top,#3a2c6d,#0c0c14 65%),
+linear-gradient(180deg,#0c0c14,#07070d);
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:30px;
 }
 
-/* Card glass */
-.glass-card {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(15px);
-    border-radius: 25px;
-    border: 1px solid rgba(255,255,255,0.2);
-    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
-    color: white;
-    max-width: 720px;
-    width: 100%;
-    margin: 0 auto;
+
+/* ===== CARD PRINCIPAL ===== */
+
+.glass-card{
+background:rgba(20,20,40,.75);
+backdrop-filter:blur(20px);
+border-radius:22px;
+border:1px solid rgba(140,120,255,.25);
+box-shadow:0 25px 60px rgba(0,0,0,.6);
+color:#eee;
+max-width:720px;
+width:100%;
+transition:.3s;
 }
 
-/* Header */
-.card-header-custom {
-    background: linear-gradient(90deg, #7f00ff, #e100ff);
-    border-radius: 25px 25px 0 0;
-    padding: 18px 30px; /* reducido vertical */
+.glass-card:hover{
+box-shadow:0 30px 70px rgba(120,90,255,.35);
 }
 
-.card-header-custom h2 {
-    font-size: 1.8rem;
-    margin-bottom: 2px;
+
+/* ===== HEADER ===== */
+
+.card-header-custom{
+background:linear-gradient(90deg,#6d5dfc,#a78bfa);
+border-radius:22px 22px 0 0;
+padding:20px 30px;
+text-align:center;
+color:white;
+box-shadow:0 10px 30px rgba(120,90,255,.35);
 }
 
-.card-header-custom small {
-    opacity: 0.85;
+.card-header-custom h2{
+font-size:1.9rem;
+font-weight:700;
+letter-spacing:1px;
 }
 
-/* Card body - REDUCIDO */
-.glass-card .card-body {
-    padding: 20px 35px;
+.card-header-custom small{
+opacity:.9;
+font-size:.9rem;
 }
 
-/* Inputs */
+
+/* ===== BODY ===== */
+
+.glass-card .card-body,
+.glass-card .p-5{
+padding:30px 40px;
+}
+
+
+/* ===== LABELS ===== */
+
+.glass-card label{
+font-weight:600;
+color:#c9c2ff;
+letter-spacing:.4px;
+margin-bottom:6px;
+display:block;
+}
+
+
+/* ===== INPUTS ===== */
+
 .glass-card .form-control,
-.glass-card .form-select {
-    background: rgba(255,255,255,0.15);
-    border: none;
-    color: white;
-    border-radius: 12px;
-    padding: 6px 12px; /* menos altura */
+.glass-card .form-select{
+background:rgba(255,255,255,.08);
+border:1px solid rgba(140,120,255,.25);
+color:white;
+border-radius:12px;
+padding:8px 12px;
+transition:.25s;
 }
 
-.glass-card .form-select option {
-    background: white;
-    color: black;
+.glass-card .form-select option{
+background:#121222;
+color:white;
 }
 
 .glass-card .form-control:focus,
-.glass-card .form-select:focus {
-    background: rgba(255,255,255,0.25);
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
-    color: white;
+.glass-card .form-select:focus{
+background:rgba(255,255,255,.15);
+border-color:#9f7aea;
+box-shadow:0 0 0 3px rgba(159,122,234,.35);
+color:white;
 }
 
-/* Labels */
-.glass-card label {
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px; /* menos espacio */
-    display: block;
+
+/* ===== INPUT GROUP ===== */
+
+.input-group-text{
+background:rgba(255,255,255,.08);
+border:none;
+color:#d6d0ff;
+border-radius:12px 0 0 12px;
 }
 
-/* Menos espacio entre filas */
-.glass-card .row {
-    margin-bottom: 12px;
+
+/* ===== SWITCH ===== */
+
+.form-check{
+display:flex;
+align-items:center;
+gap:8px;
+margin-top:12px;
+color:#ddd;
 }
 
-/* Precio */
-.input-group-text {
-    border-radius: 12px 0 0 12px;
-    padding: 6px 10px;
+
+/* ===== FILAS ===== */
+
+.glass-card .row{
+margin-bottom:14px;
 }
 
-/* Switch */
-.form-check {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
+
+/* ===== BOTONES ===== */
+
+.btn-modern{
+border-radius:50px;
+padding:9px 28px;
+font-weight:600;
+transition:.25s;
+letter-spacing:.3px;
 }
 
-/* Zona botones */
-.glass-card .d-flex {
-    margin-top: 10px !important;
+
+/* cancelar */
+
+.btn-cancel{
+background:transparent;
+border:2px solid rgba(255,255,255,.35);
+color:#eee;
 }
 
-/* Botones */
-.btn-modern {
-    border-radius: 50px;
-    padding: 8px 26px;
-    font-weight: 600;
-    transition: 0.3s ease;
+.btn-cancel:hover{
+background:rgba(255,255,255,.15);
+border-color:white;
 }
 
-.btn-cancel {
-    background: transparent;
-    border: 2px solid rgba(255,255,255,0.6);
-    color: white;
+
+/* guardar */
+
+.btn-save{
+background:linear-gradient(135deg,#7b68ee,#9f7aea);
+border:none;
+color:white;
+box-shadow:0 10px 25px rgba(120,90,255,.35);
 }
 
-.btn-cancel:hover {
-    background: rgba(255,255,255,0.2);
+.btn-save:hover{
+transform:translateY(-2px);
+box-shadow:0 12px 30px rgba(120,90,255,.5);
+background:linear-gradient(135deg,#9f7aea,#c4b5fd);
+color:#0a0a12;
 }
 
-.btn-save {
-    background: linear-gradient(90deg, #00c6ff, #0072ff);
-    border: none;
-    color: white;
-}
-
-.btn-save:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-}
 </style>
 
+
 <div class="dashboard-bg">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-9">
 
-                <div class="glass-card">
+<div class="container">
 
-                    <!-- Header -->
-                    <div class="card-header-custom p-4 text-center">
-                        <h2 class="fw-bold mb-0">
-                            🎬 {{ titulo }}
-                        </h2>
-                        <small>Configura los detalles de la función</small>
-                    </div>
+<div class="row justify-content-center">
 
-                    <div class="p-5">
+<div class="col-lg-9">
 
-                        <form method="post">
-                            {% csrf_token %}
+<div class="glass-card">
 
-                            <div class="row g-4">
+<!-- HEADER -->
 
-                                <div class="col-md-6">
-                                    <label class="form-label">Película</label>
-                                    {{ form.movie }}
+<div class="card-header-custom">
 
-                                    <label class="form-label mt-4">Sala</label>
-                                    {{ form.room }}
-                                </div>
+<h2>
+🎬 {{ titulo }}
+</h2>
 
-                                <div class="col-md-6">
-                                    <label class="form-label">Fecha</label>
-                                    {{ form.date }}
+<small>
+Configura los detalles de la función
+</small>
 
-                                    <label class="form-label mt-4">Hora</label>
-                                    {{ form.time }}
+</div>
 
-                                    <label class="form-label mt-4">Precio base</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-transparent text-white border-0">$</span>
-                                        {{ form.base_price }}
-                                    </div>
 
-                                    <div class="form-check form-switch mt-4">
-                                        {{ form.active }}
-                                        <label class="form-check-label ms-2" for="{{ form.active.id_for_label }}">
-                                            Función activa
-                                        </label>
-                                    </div>
-                                </div>
+<div class="p-5">
 
-                            </div>
+<form method="post">
 
-                            <div class="d-flex justify-content-end gap-3 mt-5">
-                                <a href="{% url 'admin_funciones' %}" 
-                                   class="btn btn-modern btn-cancel">
-                                    Cancelar
-                                </a>
+{% csrf_token %}
 
-                                <button type="submit" 
-                                        class="btn btn-modern btn-save">
-                                    Guardar Función
-                                </button>
-                            </div>
+<div class="row g-4">
 
-                        </form>
 
-                    </div>
-                </div>
+<div class="col-md-6">
 
-            </div>
-        </div>
-    </div>
+<label>Película</label>
+{{ form.movie }}
+
+<label class="mt-4">Sala</label>
+{{ form.room }}
+
+</div>
+
+
+<div class="col-md-6">
+
+<label>Fecha</label>
+{{ form.date }}
+
+<label class="mt-4">Hora</label>
+{{ form.time }}
+
+<label class="mt-4">Precio base</label>
+
+<div class="input-group">
+<span class="input-group-text">$</span>
+{{ form.base_price }}
+</div>
+
+
+<div class="form-check form-switch mt-4">
+
+{{ form.active }}
+
+<label class="ms-2" for="{{ form.active.id_for_label }}">
+Función activa
+</label>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<div class="d-flex justify-content-end gap-3 mt-4">
+
+<a href="{% url 'admin_funciones' %}" 
+class="btn btn-modern btn-cancel">
+Cancelar
+</a>
+
+<button type="submit" 
+class="btn btn-modern btn-save">
+Guardar Función
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 </div>
 
 {% endblock %}

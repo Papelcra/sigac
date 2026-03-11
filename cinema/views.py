@@ -8,9 +8,8 @@ from django.template.loader import render_to_string
 import os
 from django.http import HttpResponse
 from django.db.models import Sum
-from .models import Producto, Combo
 from decimal import Decimal
-
+from .models import Producto, Combo, VentaConfiteria, DetalleVentaConfiteria
 def clear_expired_reservations():
     """Libera automáticamente reservas vencidas (estado 'reservado' pasado el tiempo)."""
     now = timezone.now()
@@ -314,17 +313,16 @@ def cierre_caja(request):
     return render(request, 'cinema/cierre_caja.html', context)
 
 
-
 @login_required
-def dashboard_vendedor(request):
+def vendedor_dashboard(request):
+    # Asegúrate de usar el modelo correcto
+    lista_productos = Producto.objects.all() 
+    lista_combos = Combo.objects.all()
+    return render(request, "users/vendedor_dashboard.html",{
+    'productos': lista_productos,
+    'combos': lista_combos,
+})
 
-    productos = Producto.objects.all()
-    combos = Combo.objects.all()
-
-    return render(request, "users/dashboard_vendedor.html", {
-        "productos": productos,
-        "combos": combos
-    })
 @login_required
 def vender_producto(request, id):
 
@@ -334,14 +332,14 @@ def vender_producto(request, id):
 
         if producto.stock <= 0:
             messages.error(request, "No hay stock disponible")
-            return redirect("dashboard_vendedor")
+            return redirect("vendedor_dashboard")
 
         producto.stock -= 1
         producto.save()
 
         messages.success(request, f"Se vendió {producto.nombre}")
 
-    return redirect("dashboard_vendedor")
+    return redirect("vendedor_dashboard")
 
 @login_required
 def vender_combo(request, id):
@@ -354,7 +352,7 @@ def vender_combo(request, id):
 
             if producto.stock <= 0:
                 messages.error(request, f"No hay stock de {producto.nombre}")
-                return redirect("dashboard_vendedor")
+                return redirect("vendedor_dashboard")
 
         for producto in combo.productos.all():
             producto.stock -= 1
@@ -362,17 +360,39 @@ def vender_combo(request, id):
 
         messages.success(request, f"Se vendió el combo {combo.nombre}")
 
-    return redirect("dashboard_vendedor")
+    return redirect("vendedor_dashboard")
 
+from .models import CompraCombo
+
+@login_required
 def cliente_dashboard(request):
 
-    tickets = Ticket.objects.filter(user=request.user)
+    if request.user.role != 'cliente':
+        messages.error(request, "Acceso no autorizado.")
+        return redirect('home')
+
+    tickets = Ticket.objects.filter(
+        user=request.user,
+        status__in=['paid', 'used']
+    ).select_related(
+        'show_seat__show__movie',
+        'show_seat__seat'
+    ).order_by('-purchase_date')
+
     combos = Combo.objects.all()
 
-    return render(request, "cliente/dashboard.html", {
-        "tickets": tickets,
-        "combos": combos
-    })
+    # CONSULTAR COMBOS COMPRADOS
+    combos_comprados = CompraCombo.objects.filter(
+        usuario=request.user
+    ).select_related('combo').order_by('-fecha')
+
+    context = {
+        'tickets': tickets,
+        'combos': combos,
+        'combos_comprados': combos_comprados
+    }
+
+    return render(request, 'users/cliente_dashboard.html', context)
 
 
 def admin_productos(request):
@@ -516,3 +536,6 @@ def eliminar_combo(request, id):
     return render(request, "users/eliminar_combo.html", {
         "combo": combo
     })
+
+from django.contrib import messages
+

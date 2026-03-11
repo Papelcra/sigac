@@ -3,184 +3,351 @@
 {% block title %}Dashboard - Administrador{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
 
-<h1 class="text-center mb-5 fw-bold text-primary">Panel de Administración</h1>
+<style>
 
-<div class="alert alert-primary text-center mb-5 shadow-sm">
-<h4 class="alert-heading">¡Bienvenido, {{ user.username }}!</h4>
-<p class="lead">Administra el cine desde este panel.</p>
+/* ===== FONDO GENERAL ===== */
+
+.cinema-dashboard{
+background:
+radial-gradient(circle at top,#3a2c6d,#0c0c14 65%),
+linear-gradient(180deg,#0c0c14,#07070d);
+min-height:100vh;
+padding:50px 20px;
+}
+
+
+/* ===== MARQUESINA ===== */
+
+.cinema-header{
+background:linear-gradient(90deg,#6d5dfc,#a78bfa);
+border-radius:16px;
+padding:35px;
+text-align:center;
+color:white;
+box-shadow:0 10px 40px rgba(123,104,238,.35);
+margin-bottom:50px;
+}
+
+.cinema-header h1{
+font-weight:700;
+letter-spacing:2px;
+}
+
+.cinema-header p{
+opacity:.9;
+}
+
+
+/* ===== TARJETAS ESTADISTICAS ===== */
+
+.stat-card{
+background:#121222;
+border-radius:16px;
+padding:30px;
+text-align:center;
+border:1px solid #2a2a45;
+position:relative;
+overflow:hidden;
+transition:.3s;
+}
+
+.stat-card::before{
+content:"";
+position:absolute;
+top:-40%;
+left:-40%;
+width:200%;
+height:200%;
+background:radial-gradient(circle,#7b68ee33,transparent 60%);
+}
+
+.stat-card:hover{
+transform:translateY(-6px);
+box-shadow:0 10px 40px rgba(140,120,255,.3);
+}
+
+.stat-icon{
+font-size:42px;
+margin-bottom:10px;
+}
+
+
+/* ===== COLORES DE ICONOS ===== */
+
+.icon-movie{
+color:#a78bfa;
+text-shadow:0 0 10px rgba(167,139,250,.7);
+}
+
+.icon-show{
+color:#38bdf8;
+text-shadow:0 0 10px rgba(56,189,248,.7);
+}
+
+.icon-room{
+color:#f59e0b;
+text-shadow:0 0 10px rgba(245,158,11,.7);
+}
+
+.icon-money{
+color:#22c55e;
+text-shadow:0 0 10px rgba(34,197,94,.7);
+}
+
+.icon-product{
+color:#fb923c;
+text-shadow:0 0 10px rgba(251,146,60,.7);
+}
+
+.icon-combo{
+color:#e879f9;
+text-shadow:0 0 10px rgba(232,121,249,.7);
+}
+
+.icon-users{
+color:#60a5fa;
+text-shadow:0 0 10px rgba(96,165,250,.7);
+}
+
+.icon-report{
+color:#34d399;
+text-shadow:0 0 10px rgba(52,211,153,.7);
+}
+
+.icon-caja{
+color:#f43f5e;
+text-shadow:0 0 10px rgba(244,63,94,.7);
+}
+
+.icon-reservas{
+color:#3b82f6;
+text-shadow:0 0 10px rgba(59,130,246,.7);
+}
+
+.icon-venta{
+color:#22c55e;
+text-shadow:0 0 10px rgba(34,197,94,.7);
+}
+
+
+/* ===== NUMEROS ===== */
+
+.stat-number{
+font-size:32px;
+font-weight:700;
+color:white;
+}
+
+.stat-label{
+color:#bcbce2;
+}
+
+
+/* ===== TITULOS ===== */
+
+.section-title{
+color:#c9c2ff;
+font-weight:700;
+margin-bottom:25px;
+letter-spacing:1px;
+}
+
+
+/* ===== TARJETAS DE ACCION ===== */
+
+.action-card{
+background:linear-gradient(145deg,#17172a,#10101c);
+border-radius:14px;
+padding:28px;
+text-align:center;
+border:1px solid #2d2d4f;
+height:100%;
+transition:.25s;
+}
+
+.action-card:hover{
+transform:scale(1.03);
+box-shadow:0 10px 35px rgba(120,90,255,.25);
+border-color:#7b68ee;
+}
+
+.action-icon{
+font-size:38px;
+margin-bottom:12px;
+}
+
+.action-card h5{
+color:white;
+font-weight:600;
+}
+
+.action-card p{
+color:#bcbce2;
+font-size:14px;
+}
+
+
+/* ===== BOTONES ===== */
+
+.btn-cinema{
+background:linear-gradient(135deg,#7b68ee,#9f7aea);
+border:none;
+color:white;
+font-weight:600;
+margin-top:15px;
+border-radius:8px;
+padding:8px 20px;
+}
+
+.btn-cinema:hover{
+background:linear-gradient(135deg,#9f7aea,#c4b5fd);
+color:#0a0a12;
+}
+
+</style>
+
+
+<div class="cinema-dashboard container">
+
+<div class="cinema-header">
+<h1>Panel de Administración</h1>
+<p>Bienvenido {{ user.username }} — Centro de control del cine</p>
 </div>
 
 
-<!-- RESUMEN -->
+<!-- ESTADISTICAS -->
+
 <div class="row g-4 mb-5">
 
 <div class="col-md-3">
-<div class="card shadow border-primary h-100 text-center">
-<div class="card-body">
-<i class="bi bi-film display-4 text-primary mb-3"></i>
-<h3>{{ total_peliculas|default:0 }}</h3>
-<p>Películas</p>
-</div>
-</div>
-</div>
-
-<div class="col-md-3">
-<div class="card shadow border-success h-100 text-center">
-<div class="card-body">
-<i class="bi bi-calendar-event display-4 text-success mb-3"></i>
-<h3>{{ funciones_hoy|default:0 }}</h3>
-<p>Funciones hoy</p>
-</div>
+<div class="stat-card">
+<i class="bi bi-film stat-icon icon-movie"></i>
+<div class="stat-number">{{ total_peliculas|default:0 }}</div>
+<div class="stat-label">Películas</div>
 </div>
 </div>
 
 <div class="col-md-3">
-<div class="card shadow border-info h-100 text-center">
-<div class="card-body">
-<i class="bi bi-building display-4 text-info mb-3"></i>
-<h3>{{ salas|length|default:0 }}</h3>
-<p>Salas</p>
-</div>
+<div class="stat-card">
+<i class="bi bi-calendar-event stat-icon icon-show"></i>
+<div class="stat-number">{{ funciones_hoy|default:0 }}</div>
+<div class="stat-label">Funciones hoy</div>
 </div>
 </div>
 
 <div class="col-md-3">
-<div class="card shadow border-danger h-100 text-center">
-<div class="card-body">
-<i class="bi bi-currency-dollar display-4 text-danger mb-3"></i>
-<h3>${{ ventas_dia|default:"0.00"|floatformat:2 }}</h3>
-<p>Ventas del día</p>
+<div class="stat-card">
+<i class="bi bi-building stat-icon icon-room"></i>
+<div class="stat-number">{{ salas|length|default:0 }}</div>
+<div class="stat-label">Salas</div>
 </div>
+</div>
+
+<div class="col-md-3">
+<div class="stat-card">
+<i class="bi bi-currency-dollar stat-icon icon-money"></i>
+<div class="stat-number">${{ ventas_dia|floatformat:2 }}</div>
+<div class="stat-label">Ventas del día</div>
 </div>
 </div>
 
 </div>
 
 
-<!-- OPERACIÓN DEL CINE -->
-<h4 class="mb-4">Gestión del Cine</h4>
+<!-- GESTION CINE -->
+
+<h4 class="section-title">Gestión del Cine</h4>
 
 <div class="row g-4 mb-5">
 
 <div class="col-md-4">
-<div class="card shadow h-100 border-primary">
-<div class="card-body text-center d-flex flex-column">
-<i class="bi bi-film display-4 text-primary mb-3"></i>
+<div class="action-card">
+<i class="bi bi-film action-icon icon-movie"></i>
 <h5>Películas</h5>
-<p>Gestiona el catálogo.</p>
-<a href="{% url 'admin_peliculas' %}" class="btn btn-primary mt-auto">
-Gestionar
-</a>
-</div>
+<p>Administrar cartelera</p>
+<a href="{% url 'admin_peliculas' %}" class="btn btn-cinema">Abrir</a>
 </div>
 </div>
 
 <div class="col-md-4">
-<div class="card shadow h-100 border-success">
-<div class="card-body text-center d-flex flex-column">
-<i class="bi bi-calendar-event display-4 text-success mb-3"></i>
+<div class="action-card">
+<i class="bi bi-calendar-event action-icon icon-show"></i>
 <h5>Funciones</h5>
-<p>Programa horarios.</p>
-<a href="{% url 'admin_funciones' %}" class="btn btn-success mt-auto">
-Gestionar
-</a>
-</div>
+<p>Programar horarios</p>
+<a href="{% url 'admin_funciones' %}" class="btn btn-cinema">Abrir</a>
 </div>
 </div>
 
 <div class="col-md-4">
-<div class="card shadow h-100 border-info">
-<div class="card-body text-center d-flex flex-column">
-<i class="bi bi-building display-4 text-info mb-3"></i>
+<div class="action-card">
+<i class="bi bi-building action-icon icon-room"></i>
 <h5>Salas</h5>
-<p>Configura salas y asientos.</p>
-<a href="{% url 'admin_salas' %}" class="btn btn-info mt-auto">
-Gestionar
-</a>
-</div>
+<p>Configurar asientos</p>
+<a href="{% url 'admin_salas' %}" class="btn btn-cinema">Abrir</a>
 </div>
 </div>
 
 </div>
 
 
-<!-- CONFITERÍA -->
-<h4 class="mb-4">Confitería</h4>
+<!-- CONFITERIA -->
+
+<h4 class="section-title">Confitería</h4>
 
 <div class="row g-4 mb-5">
 
 <div class="col-md-6">
-<div class="card shadow h-100 border-secondary">
-<div class="card-body text-center d-flex flex-column">
-<i class="bi bi-cup-straw display-4 text-secondary mb-3"></i>
+<div class="action-card">
+<i class="bi bi-cup-straw action-icon icon-product"></i>
 <h5>Productos</h5>
-<p>Snacks y bebidas.</p>
-<a href="{% url 'admin_productos' %}" class="btn btn-secondary mt-auto">
-Gestionar Productos
-</a>
-</div>
+<p>Snacks y bebidas</p>
+<a href="{% url 'admin_productos' %}" class="btn btn-cinema">Gestionar</a>
 </div>
 </div>
 
 <div class="col-md-6">
-<div class="card shadow h-100 border-warning">
-<div class="card-body text-center d-flex flex-column">
-<i class="bi bi-box-seam display-4 text-warning mb-3"></i>
+<div class="action-card">
+<i class="bi bi-box-seam action-icon icon-combo"></i>
 <h5>Combos</h5>
-<p>Promociones y paquetes.</p>
-<a href="{% url 'admin_combos' %}" class="btn btn-warning mt-auto">
-Gestionar Combos
-</a>
-</div>
+<p>Promociones del cine</p>
+<a href="{% url 'admin_combos' %}" class="btn btn-cinema">Gestionar</a>
 </div>
 </div>
 
 </div>
 
 
-<!-- ADMINISTRACIÓN -->
-<h4 class="mb-4">Administración</h4>
+<!-- ADMIN -->
+
+<h4 class="section-title">Administración</h4>
 
 <div class="row g-4">
 
 <div class="col-md-4">
-<div class="card shadow h-100 border-dark">
-<div class="card-body text-center d-flex flex-column">
-<i class="bi bi-people display-4 text-dark mb-3"></i>
+<div class="action-card">
+<i class="bi bi-people action-icon icon-users"></i>
 <h5>Usuarios</h5>
-<p>Gestiona el personal.</p>
-<a href="{% url 'admin_usuarios' %}" class="btn btn-dark mt-auto">
-Gestionar Usuarios
-</a>
-</div>
+<p>Personal del cine</p>
+<a href="{% url 'admin_usuarios' %}" class="btn btn-cinema">Gestionar</a>
 </div>
 </div>
 
 <div class="col-md-4">
-<div class="card shadow h-100 border-secondary">
-<div class="card-body text-center d-flex flex-column">
-<i class="bi bi-graph-up-arrow display-4 text-secondary mb-3"></i>
+<div class="action-card">
+<i class="bi bi-graph-up-arrow action-icon icon-report"></i>
 <h5>Reportes</h5>
-<p>Ventas y estadísticas.</p>
-<a href="{% url 'admin_reportes' %}" class="btn btn-secondary mt-auto">
-Ver Reportes
-</a>
-</div>
+<p>Ventas y estadísticas</p>
+<a href="{% url 'admin_reportes' %}" class="btn btn-cinema">Ver</a>
 </div>
 </div>
 
 <div class="col-md-4">
-<div class="card shadow h-100 border-danger">
-<div class="card-body text-center d-flex flex-column">
-<i class="bi bi-cash-stack display-4 text-danger mb-3"></i>
+<div class="action-card">
+<i class="bi bi-cash-stack action-icon icon-caja"></i>
 <h5>Cierre de Caja</h5>
-<p>Control de turnos.</p>
-<a href="{% url 'cierre_caja' %}" class="btn btn-danger mt-auto">
-Ver Cierres
-</a>
-</div>
+<p>Control de turnos</p>
+<a href="{% url 'cierre_caja' %}" class="btn btn-cinema">Abrir</a>
 </div>
 </div>
 

@@ -3,42 +3,203 @@
 {% block title %}Cartelera - SIGAC{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="text-center mb-5">Cartelera Actual</h1>
 
-    {% if shows %}
-        <div class="row">
-            {% for show in shows %}
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm">
-                        {% if show.movie.poster %}
-                            <img src="{{ show.movie.poster.url }}" class="card-img-top" alt="{{ show.movie.title }}" style="height: 250px; object-fit: cover;">
-                        {% else %}
-                            <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 250px;">
-                                Sin póster
-                            </div>
-                        {% endif %}
-                        <div class="card-body">
-                            <h5 class="card-title">{{ show.movie.title }}</h5>
-                            <p class="card-text">
-                                <strong>Sala:</strong> {{ show.room.name }}<br>
-                                <strong>Fecha:</strong> {{ show.date }}<br>
-                                <strong>Hora:</strong> {{ show.time|time:"H:i" }}<br>
-                                <strong>Precio:</strong> ${{ show.base_price }}
-                            </p>
-                            <a href="{% url 'seat_selection' show.id %}" class="btn btn-primary w-100">
-                                Seleccionar Asientos
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="alert alert-info text-center">
-            <h4>No hay funciones disponibles en este momento</h4>
-            <p>Revisa más tarde o contacta al cine.</p>
-        </div>
-    {% endif %}
+<style>
+
+/* ===== FONDO ===== */
+
+.cartelera-bg{
+background:
+radial-gradient(circle at top,#3a2c6d,#0c0c14 70%),
+linear-gradient(180deg,#0c0c14,#07070d);
+min-height:100vh;
+padding:50px 20px;
+}
+
+
+/* ===== TITULO ===== */
+
+.cartelera-title{
+color:#c9c2ff;
+font-weight:700;
+letter-spacing:1px;
+}
+
+
+/* ===== CARD PELICULA ===== */
+
+.movie-card{
+background:linear-gradient(145deg,#17172a,#10101c);
+border-radius:16px;
+border:1px solid #2d2d4f;
+box-shadow:0 12px 35px rgba(0,0,0,.55);
+overflow:hidden;
+transition:.25s;
+color:#eaeaff;
+}
+
+.movie-card:hover{
+transform:translateY(-6px);
+box-shadow:0 18px 45px rgba(120,90,255,.35);
+border-color:#7b68ee;
+}
+
+
+/* ===== POSTER ===== */
+
+.movie-poster{
+height:250px;
+object-fit:cover;
+}
+
+
+/* ===== BODY ===== */
+
+.movie-card .card-body{
+display:flex;
+flex-direction:column;
+}
+
+.movie-title{
+font-weight:600;
+color:white;
+margin-bottom:10px;
+}
+
+.movie-info{
+color:#cfcfff;
+font-size:14px;
+line-height:1.6;
+}
+
+
+/* ===== PRECIO ===== */
+
+.movie-price{
+color:#34d399;
+font-weight:700;
+}
+
+
+/* ===== BOTON ===== */
+
+.btn-ticket{
+margin-top:auto;
+background:linear-gradient(135deg,#7b68ee,#9f7aea);
+border:none;
+color:white;
+font-weight:600;
+border-radius:10px;
+padding:10px;
+transition:.2s;
+}
+
+.btn-ticket:hover{
+background:linear-gradient(135deg,#9f7aea,#c4b5fd);
+color:#0a0a12;
+}
+
+
+/* ===== SIN POSTER ===== */
+
+.no-poster{
+height:250px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#2a2a44;
+color:#aaa;
+font-weight:500;
+}
+
+</style>
+
+
+<div class="cartelera-bg">
+
+<div class="container">
+
+<h1 class="text-center mb-5 cartelera-title">
+🎬 Cartelera Actual
+</h1>
+
+{% if shows %}
+
+<div class="row g-4">
+
+{% for show in shows %}
+
+<div class="col-md-4">
+
+<div class="card movie-card h-100">
+
+{% if show.movie.poster %}
+
+<img src="{{ show.movie.poster.url }}"
+class="card-img-top movie-poster"
+alt="{{ show.movie.title }}">
+
+{% else %}
+
+<div class="no-poster">
+Sin póster
 </div>
+
+{% endif %}
+
+<div class="card-body">
+
+<h5 class="movie-title">
+{{ show.movie.title }}
+</h5>
+
+<p class="movie-info">
+
+<strong>Sala:</strong> {{ show.room.name }}<br>
+
+<strong>Fecha:</strong> {{ show.date }}<br>
+
+<strong>Hora:</strong> {{ show.time|time:"H:i" }}<br>
+
+<strong>Precio:</strong>
+<span class="movie-price">
+${{ show.base_price }}
+</span>
+
+</p>
+
+<a href="{% url 'seat_selection' show.id %}"
+class="btn btn-ticket w-100">
+
+Seleccionar Asientos
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="alert text-center mt-5"
+style="background:#1e1e34;color:#cfcfff;border:1px solid #3a3a70;">
+
+<h4>No hay funciones disponibles en este momento</h4>
+
+<p>Revisa más tarde o contacta al cine.</p>
+
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+
 {% endblock %}

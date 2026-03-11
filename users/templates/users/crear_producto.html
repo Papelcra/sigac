@@ -2,11 +2,116 @@
 
 {% block content %}
 
-<div class="container mt-5">
+<style>
 
-<h2>Nuevo Producto</h2>
+/* ===== FONDO ===== */
+
+.product-dashboard{
+background:
+radial-gradient(circle at top,#3a2c6d,#0c0c14 65%),
+linear-gradient(180deg,#0c0c14,#07070d);
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:40px;
+}
+
+
+/* ===== CARD ===== */
+
+.product-card{
+background:rgba(20,20,40,.85);
+backdrop-filter:blur(15px);
+border-radius:20px;
+border:1px solid rgba(140,120,255,.25);
+box-shadow:0 25px 60px rgba(0,0,0,.6);
+padding:40px;
+width:100%;
+max-width:550px;
+color:#eee;
+transition:.3s;
+}
+
+.product-card:hover{
+box-shadow:0 30px 70px rgba(120,90,255,.35);
+}
+
+
+/* ===== TITULO ===== */
+
+.product-title{
+text-align:center;
+font-weight:700;
+margin-bottom:25px;
+color:#c9c2ff;
+letter-spacing:1px;
+}
+
+
+/* ===== LABELS ===== */
+
+.product-card label{
+font-weight:600;
+color:#c9c2ff;
+margin-bottom:5px;
+display:block;
+}
+
+
+/* ===== INPUTS ===== */
+
+.product-card .form-control{
+background:rgba(255,255,255,.08);
+border:1px solid rgba(140,120,255,.25);
+color:white;
+border-radius:12px;
+padding:8px 12px;
+transition:.25s;
+}
+
+.product-card .form-control:focus{
+background:rgba(255,255,255,.15);
+border-color:#9f7aea;
+box-shadow:0 0 0 3px rgba(159,122,234,.35);
+color:white;
+}
+
+
+/* ===== BOTON ===== */
+
+.btn-product{
+width:100%;
+margin-top:15px;
+border-radius:40px;
+padding:10px;
+font-weight:600;
+background:linear-gradient(135deg,#7b68ee,#9f7aea);
+border:none;
+color:white;
+transition:.25s;
+}
+
+.btn-product:hover{
+transform:translateY(-2px);
+box-shadow:0 10px 25px rgba(120,90,255,.5);
+background:linear-gradient(135deg,#9f7aea,#c4b5fd);
+color:#0a0a12;
+}
+
+</style>
+
+
+<div class="product-dashboard">
+
+<div class="product-card">
+
+<h2 class="product-title">
+🍿 Nuevo Producto
+</h2>
 
 <form method="POST">
+
 {% csrf_token %}
 
 <div class="mb-3">
@@ -24,11 +129,13 @@
 <input type="number" name="stock" class="form-control">
 </div>
 
-<button class="btn btn-success">
+<button class="btn btn-product">
 Guardar producto
 </button>
 
 </form>
+
+</div>
 
 </div>
 
