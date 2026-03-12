@@ -9,11 +9,29 @@ from django.http import HttpResponse
 from django.db.models import Sum
 # Librería para generar PDF (estable en Render y local)
 from xhtml2pdf import pisa
+from decimal import Decimal
 
 # Para confitería y precios precisos (de la rama de tu compañera)
 from decimal import Decimal
 from .models import Producto, Combo, VentaConfiteria, DetalleVentaConfiteria
+from django.shortcuts import render
+from .models import Ticket   # o el modelo que tengas para entradas
 
+from django.shortcuts import render
+from .models import Ticket
+
+def reporte_entradas_validadas(request):
+
+    entradas = Ticket.objects.filter(status="used").select_related(
+        "show_seat__show__movie",
+        "show_seat__seat__room"
+    )
+
+    return render(
+        request,
+        "cinema/reporte_entradas_validadas.html",
+        {"entradas": entradas}
+    )
 
 def clear_expired_reservations():
     """Libera automáticamente reservas vencidas (estado 'reservado' pasado el tiempo)."""
@@ -106,9 +124,11 @@ def reserve_seats(request, show_id):
     return redirect('seat_selection', show_id=show_id)
 
 
+
+
 @login_required
 def confirm_purchase(request, show_id):
-    """Confirmación de compra (para ventas directas o simuladas)."""
+
     if request.method != 'POST':
         return redirect('seat_selection', show_id=show_id)
 
@@ -120,9 +140,19 @@ def confirm_purchase(request, show_id):
         return redirect('seat_selection', show_id=show_id)
 
     tickets_created = []
+    total_compra = Decimal("0.00")
+
     for seat_id in selected_seat_ids:
+
         try:
-            show_seat = ShowSeat.objects.get(id=seat_id, show=show, status='reservado', reserved_by=request.user)
+
+            show_seat = ShowSeat.objects.get(
+                id=seat_id,
+                show=show,
+                status='reservado',
+                reserved_by=request.user
+            )
+
             show_seat.status = 'vendido'
             show_seat.reserved_until = None
             show_seat.save()
@@ -133,17 +163,29 @@ def confirm_purchase(request, show_id):
                 price=show.base_price,
                 status='paid'
             )
+
             tickets_created.append(ticket)
+
+            # SUMAR PRECIO
+            total_compra += show.base_price
+
         except ShowSeat.DoesNotExist:
             continue
 
     if tickets_created:
-        messages.success(request, f"¡Compra confirmada! Generados {len(tickets_created)} ticket(s).")
-        return redirect('ticket_detail', ticket_id=tickets_created[0].id)
-    
-    messages.error(request, "No se pudo confirmar la compra (asientos ya no disponibles).")
-    return redirect('seat_selection', show_id=show_id)
 
+        messages.success(
+            request,
+            f"Compra confirmada. {len(tickets_created)} ticket(s) generados. Total: ${total_compra}"
+        )
+
+        return render(request, "cinema/compra_exitosa.html", {
+            "tickets": tickets_created,
+            "total": total_compra
+        })
+
+    messages.error(request, "No se pudo confirmar la compra.")
+    return redirect('seat_selection', show_id=show_id)
 
 @login_required
 def pending_reservations(request):

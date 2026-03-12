@@ -1,13 +1,18 @@
 from django.urls import path
 from . import views
 from users import views as user_views
+from .views import reporte_entradas_validadas
 
 
 urlpatterns = [
     path('cartelera/', views.movie_list, name='movie_list'),
     path('funcion/<int:show_id>/asientos/', views.seat_selection, name='seat_selection'),
     path('funcion/<int:show_id>/reservar/', views.reserve_seats, name='reserve_seats'),
-
+    path(
+        "reporte-entradas/",
+        reporte_entradas_validadas,
+        name="reporte_entradas"
+    ),
     path('reservas-pendientes/', views.pending_reservations, name='pending_reservations'),
     path('confirmar-venta/<int:show_seat_id>/', views.confirm_sale, name='confirm_sale'),
 

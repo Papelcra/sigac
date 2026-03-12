@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+<h2 class="text-center text-light mb-4">
+ Reporte de Entradas Validadas
+</h2>
+
+<div class="card shadow-lg p-4">
+
+<table class="table table-striped">
+
+<thead>
+<tr>
+<th>Ticket</th>
+<th>Película</th>
+<th>Sala</th>
+<th>Asiento</th>
+<th>Fecha Compra</th>
+<th>Usuario</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for ticket in entradas %}
+
+<tr>
+
+<td>{{ ticket.uuid }}</td>
+
+<td>{{ ticket.show_seat.show.movie.title }}</td>
+
+<td>{{ ticket.show_seat.seat.room.name }}</td>
+
+<td>{{ ticket.show_seat.seat.row }}{{ ticket.show_seat.seat.number }}</td>
+
+<td>{{ ticket.purchase_date }}</td>
+
+<td>{{ ticket.user }}</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="6" class="text-center">
+No hay entradas validadas
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}
