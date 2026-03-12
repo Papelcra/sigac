@@ -359,14 +359,9 @@ Limpiar selección
 
 </button>
 
-<button type="button"
-class="btn btn-reservar btn-lg px-5"
-data-bs-toggle="modal"
-data-bs-target="#confirmModal"
-{% if not seats_by_row %}disabled{% endif %}>
-
+<button type="submit"
+class="btn btn-reservar btn-lg px-5">
 Reservar seleccionados
-
 </button>
 
 </div>
@@ -404,5 +399,47 @@ Seleccionado
 </div>
 
 </div>
+
+<script>
+
+const checkboxes = document.querySelectorAll(".seat-checkbox");
+const selectedCount = document.getElementById("selected-count");
+const totalPrice = document.getElementById("total-price");
+const clearButton = document.getElementById("clear-selection");
+
+function updateSelection(){
+
+let count = 0;
+let total = 0;
+
+checkboxes.forEach(cb => {
+
+if(cb.checked){
+
+count++;
+total += parseFloat(cb.dataset.price);
+
+}
+
+});
+
+selectedCount.textContent = count;
+totalPrice.textContent = total.toFixed(2);
+
+}
+
+checkboxes.forEach(cb => {
+cb.addEventListener("change", updateSelection);
+});
+
+clearButton.addEventListener("click", () => {
+
+checkboxes.forEach(cb => cb.checked = false);
+
+updateSelection();
+
+});
+
+</script>
 
 {% endblock %}

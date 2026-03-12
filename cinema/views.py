@@ -26,17 +26,6 @@ def clear_expired_reservations():
     if count > 0:
         expired.update(status='disponible', reserved_until=None, reserved_by=None)
         print(f"[AUTO] Liberados {count} asientos vencidos.")  # debug en consola
-def clear_expired_reservations():
-    """Libera automáticamente reservas vencidas (estado 'reservado' pasado el tiempo)."""
-    now = timezone.now()
-    expired = ShowSeat.objects.filter(
-        status='reservado',
-        reserved_until__lt=now
-    )
-    count = expired.count()
-    if count > 0:
-        expired.update(status='disponible', reserved_until=None, reserved_by=None)
-        print(f"[AUTO] Liberados {count} asientos vencidos.")  # debug en consola
 
 
 def movie_list(request):
@@ -80,31 +69,35 @@ def reserve_seats(request, show_id):
         return redirect('seat_selection', show_id=show_id)
 
     show = get_object_or_404(Show, id=show_id, active=True)
-    selected_seat_ids = request.POST.getlist('selected_seats')
+    selected_seat_ids = request.POST.getlist('selected_seats')  # <--- clave: name del input
 
     if not selected_seat_ids:
         messages.warning(request, "No seleccionaste ningún asiento.")
         return redirect('seat_selection', show_id=show_id)
 
     reserved_count = 0
+    errors = []
     for seat_id in selected_seat_ids:
         try:
-            show_seat = ShowSeat.objects.get(id=seat_id, show=show, status='disponible')
+            show_seat = ShowSeat.objects.get(
+                id=seat_id,
+                show=show,
+                status='disponible'  # solo si está disponible
+            )
             show_seat.status = 'reservado'
             show_seat.reserved_until = timezone.now() + timedelta(minutes=10)
             show_seat.reserved_by = request.user
             show_seat.save()
             reserved_count += 1
         except ShowSeat.DoesNotExist:
-            continue  # Ignorar si ya no está disponible
+            errors.append(f"Asiento {seat_id} ya no disponible o no pertenece a esta función.")
 
     if reserved_count > 0:
         messages.success(request, f"¡{reserved_count} asiento(s) reservados por 10 minutos! Dirígete a taquilla.")
     else:
-        messages.error(request, "No se pudo reservar (los asientos ya fueron tomados).")
+        messages.error(request, "No se pudo reservar ningún asiento. " + " ".join(errors) if errors else "Los asientos ya fueron tomados.")
 
     return redirect('seat_selection', show_id=show_id)
-
 
 @login_required
 def confirm_purchase(request, show_id):
@@ -166,18 +159,21 @@ def pending_reservations(request):
 @login_required
 def confirm_sale(request, show_seat_id):
     """Confirmar pago en taquilla por cajero/admin."""
+
     if request.user.role not in ['cajero', 'admin']:
         messages.error(request, "No tienes permiso para confirmar ventas.")
         return redirect('home')
 
-    show_seat = get_object_or_404(ShowSeat, id=show_seat_id, status='reservado')
+    show_seat = get_object_or_404(
+        ShowSeat,
+        id=show_seat_id,
+        status='reservado'
+    )
 
-    original_user = show_seat.reserved_by
-    if not original_user:
-        messages.warning(request, "No se encontró usuario original. Usando cajero como fallback.")
-        original_user = request.user
+    # Usuario que reservó
+    original_user = show_seat.reserved_by or request.user
 
-    # Marcar asiento como vendido
+    # Marcar asiento vendido
     show_seat.status = 'vendido'
     show_seat.reserved_until = None
     show_seat.reserved_by = None
@@ -185,15 +181,18 @@ def confirm_sale(request, show_seat_id):
 
     # Crear ticket
     ticket = Ticket.objects.create(
-        show_seat=show_seat,
-        user=original_user,
-        price=show_seat.show.base_price,
-        status='paid'
+    show_seat=show_seat,
+    user=original_user,
+    price=show_seat.show.base_price,
+    status='paid'
+)
+
+    messages.success(
+        request,
+        f"Pago confirmado. Ticket generado para asiento {show_seat.seat}."
     )
 
-    messages.success(request, f"Pago confirmado. Ticket generado para {show_seat.seat} (ID: {ticket.uuid}).")
     return redirect('pending_reservations')
-
 
 @login_required
 def ticket_detail(request, ticket_id):
@@ -280,7 +279,7 @@ def cierre_caja(request):
         messages.error(request, "Acceso solo para cajeros.")
         return redirect('home')
 
-    today = timezone.now().date()
+    today = timezone.localtime().date()
     boletos_hoy = Ticket.objects.filter(
         purchase_date__date=today,
         status='paid'
@@ -323,24 +322,71 @@ def cierre_caja(request):
     }
     return render(request, 'cinema/cierre_caja.html', context)
 
+from django.db.models import Sum
+from django.utils import timezone
+from .models import VentaProducto
+
+import pytz  # <- agrega esto arriba
+import pytz
+from decimal import Decimal
+from django.utils import timezone
 
 @login_required
 def vendedor_dashboard(request):
-    # Asegúrate de usar el modelo correcto
-    lista_productos = Producto.objects.all() 
-    lista_combos = Combo.objects.all()
-    return render(request, "users/vendedor_dashboard.html",{
-    'productos': lista_productos,
-    'combos': lista_combos,
-})
+    productos = Producto.objects.all()
+    combos = Combo.objects.all()
+
+    # Zona horaria EXACTA de Colombia (esto resuelve el desfase de medianoche)
+    bogota_tz = pytz.timezone('America/Bogota')
+    now_in_bogota = timezone.now().astimezone(bogota_tz)
+    hoy = now_in_bogota.date()
+
+    # Debug: imprime la fecha que estás usando (mira en la terminal al refrescar)
+    print(f"[DEBUG] Fecha usada para filtro en dashboard vendedor: {hoy}")
+
+    # Ventas de productos del vendedor hoy
+    ventas_productos = VentaProducto.objects.filter(
+    vendedor=request.user,
+    fecha__year=hoy.year,
+    fecha__month=hoy.month,
+    fecha__day=hoy.day
+    )
+    ventas_productos_hoy = ventas_productos.count()
+    total_productos = ventas_productos.aggregate(total=Sum("precio"))["total"] or Decimal("0.00")
+
+    # Ventas de combos del vendedor hoy
+    ventas_combos = CompraCombo.objects.filter(
+        usuario=request.user,  # o vendedor=request.user si agregas el campo
+        fecha__date=hoy
+    )
+    ventas_combos_hoy = ventas_combos.count()
+    total_combos = ventas_combos.aggregate(total=Sum("precio"))["total"] or Decimal("0.00")
+
+    # Total general del vendedor hoy
+    total_dinero = total_productos + total_combos
+    ventas_hoy = ventas_productos_hoy + ventas_combos_hoy
+
+    context = {
+        "productos": productos,
+        "combos": combos,
+        "ventas_hoy": ventas_hoy,
+        "total_dinero": total_dinero,
+        "ventas_productos_hoy": ventas_productos_hoy,
+        "ventas_combos_hoy": ventas_combos_hoy,
+        "total_productos": total_productos,
+        "total_combos": total_combos,
+        "hoy": hoy,  # opcional: muéstralo en el template para debug
+    }
+
+    return render(request, "users/vendedor_dashboard.html", context)
+
+from .models import VentaProducto
 
 @login_required
 def vender_producto(request, id):
-
     producto = get_object_or_404(Producto, id=id)
 
     if request.method == "POST":
-
         if producto.stock <= 0:
             messages.error(request, "No hay stock disponible")
             return redirect("vendedor_dashboard")
@@ -348,26 +394,38 @@ def vender_producto(request, id):
         producto.stock -= 1
         producto.save()
 
-        messages.success(request, f"Se vendió {producto.nombre}")
+        VentaProducto.objects.create(
+            producto=producto,
+            vendedor=request.user,
+            precio=producto.precio  # ya es Decimal
+        )
 
+        messages.success(request, f"Se vendió {producto.nombre}")
+    
     return redirect("vendedor_dashboard")
 
 @login_required
 def vender_combo(request, id):
-
     combo = get_object_or_404(Combo, id=id)
 
     if request.method == "POST":
-
+        # Verificar stock de todos los productos del combo
         for producto in combo.productos.all():
-
             if producto.stock <= 0:
                 messages.error(request, f"No hay stock de {producto.nombre}")
                 return redirect("vendedor_dashboard")
 
+        # Descontar stock
         for producto in combo.productos.all():
             producto.stock -= 1
             producto.save()
+
+        # Registrar la venta del combo (usamos CompraCombo, pero con vendedor)
+        CompraCombo.objects.create(
+            usuario=request.user,  # o crea un campo vendedor si prefieres separarlo
+            combo=combo,
+            precio=combo.precio
+        )
 
         messages.success(request, f"Se vendió el combo {combo.nombre}")
 

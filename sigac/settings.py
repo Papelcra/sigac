@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'sales',
     'inventory',
     'reports',
+
+    'productos',
 ]
 
 MIDDLEWARE = [
@@ -96,14 +98,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-LANGUAGE_CODE = 'es-co'  # Español Colombia, para que coincida con tu zona horaria
+LANGUAGE_CODE = 'es-co'
 
 TIME_ZONE = 'America/Bogota'
 
 USE_I18N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'

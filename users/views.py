@@ -70,17 +70,26 @@ def admin_dashboard(request):
     }
     return render(request, 'users/admin_dashboard.html', context)
 
-
 @login_required
 def cajero_dashboard(request):
+
     if request.user.role != 'cajero':
         messages.error(request, "Acceso no autorizado.")
         return redirect('home')
 
-    today = timezone.now().date()
-    boletos_hoy = Ticket.objects.filter(purchase_date__date=today, status='paid').count()
-    total_hoy = Ticket.objects.filter(purchase_date__date=today, status='paid').aggregate(total=Sum('price'))['total'] or 0
-    reservas_pendientes = ShowSeat.objects.filter(status='reservado').count()
+    today = timezone.localtime().date()
+
+    boletos_hoy = Ticket.objects.filter(
+        purchase_date__date=today
+    ).count()
+
+    total_hoy = Ticket.objects.filter(
+        purchase_date__date=today
+    ).aggregate(total=Sum('price'))['total'] or 0
+
+    reservas_pendientes = ShowSeat.objects.filter(
+        status='reservado'
+    ).count()
 
     context = {
         'boletos_hoy': boletos_hoy,
@@ -88,8 +97,8 @@ def cajero_dashboard(request):
         'reservas_pendientes': reservas_pendientes,
         'today': today,
     }
-    return render(request, 'users/cajero_dashboard.html', context)
 
+    return render(request, 'users/cajero_dashboard.html', context)
 
 from cinema.models import Producto, Combo
 

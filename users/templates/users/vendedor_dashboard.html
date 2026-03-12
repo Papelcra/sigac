@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %}Vendedor-dashboard{% endblock %}
+{% block title %}Panel del Vendedor - SIGAC{% endblock %}
 
 {% block content %}
 
 <style>
-/* ===== Panel principal ===== */
+/* Panel principal */
 .panel-card {
     background: linear-gradient(145deg, #1f1f3b, #2a2a5c);
     border-radius: 18px;
@@ -14,20 +14,45 @@
     color: #eaeaff;
 }
 
-/* Título del panel */
+/* Títulos */
 .panel-title {
     color: #cfa7ff;
     font-weight: 700;
     letter-spacing: 1px;
 }
 
-/* Mensajes Django */
+/* Mensajes */
 .alert {
     border-radius: 12px;
     font-weight: 500;
 }
 
-/* ===== Productos ===== */
+/* Estadísticas cards */
+.stat-card {
+    background: rgba(30,30,52,0.9);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid rgba(140,120,255,0.2);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #c77dff;
+}
+
+.stat-label {
+    color: #a0a0d0;
+    font-size: 1rem;
+}
+
+/* Productos */
 .table-dark {
     background: #222246;
     color: #eaeaff;
@@ -38,22 +63,15 @@
 }
 
 .badge-stock {
-    padding: 5px 10px;
+    padding: 6px 12px;
     border-radius: 12px;
     font-weight: 600;
 }
 
-.bg-stock-ok {
-    background: #8c7bff;
-    color: white;
-}
+.bg-stock-ok { background: #8c7bff; color: white; }
+.bg-stock-empty { background: #ff5c5c; color: white; }
 
-.bg-stock-empty {
-    background: #ff5c5c;
-    color: white;
-}
-
-/* Botón vender */
+/* Botones vender */
 .btn-vender {
     background: linear-gradient(90deg, #b19fff, #a080ff);
     border: none;
@@ -64,9 +82,10 @@
 
 .btn-vender:hover {
     background: linear-gradient(90deg, #c7b3ff, #b799ff);
+    transform: translateY(-2px);
 }
 
-/* ===== Combos ===== */
+/* Combos */
 .combo-card {
     background: linear-gradient(160deg, #22224d, #2e2e6c);
     border-radius: 14px;
@@ -91,101 +110,129 @@
 }
 </style>
 
-
 <div class="container mt-5">
 
-<div class="panel-card">
+    <div class="panel-card">
 
-<h1 class="text-center mb-4 panel-title">Panel del Vendedor </h1>
+        <h1 class="text-center mb-4 panel-title">Panel del Vendedor</h1>
 
-<!-- Mensajes Django -->
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            {{ message }}
+        <!-- Mensajes -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="alert alert-info text-center mb-5">
+            Bienvenido, <strong>{{ user.username }}</strong> | Rol: Vendedor
         </div>
-    {% endfor %}
-{% endif %}
 
-<div class="alert alert-info">
-Bienvenido, {{ user.username }}
-</div>
+        <!-- Estadísticas del vendedor hoy -->
+        <div class="row text-center mb-5 g-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ ventas_hoy }}</div>
+                    <div class="stat-label">Ventas totales hoy</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">${{ total_dinero|floatformat:2 }}</div>
+                    <div class="stat-label">Ingresos hoy</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ ventas_productos_hoy }}</div>
+                    <div class="stat-label">Productos vendidos</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ ventas_combos_hoy }}</div>
+                    <div class="stat-label">Combos vendidos</div>
+                </div>
+            </div>
+        </div>
 
-<hr>
+        <!-- Productos -->
+        <div class="mb-5">
+            <h3 class="panel-title mb-3">Productos disponibles</h3>
 
-<!-- Tabla Productos -->
-<h3 class="mt-4">Productos</h3>
+            <table class="table table-dark table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr>
+                        <td>{{ producto.nombre }}</td>
+                        <td>${{ producto.precio|floatformat:2 }}</td>
+                        <td>
+                            {% if producto.stock > 0 %}
+                                <span class="badge-stock bg-stock-ok">{{ producto.stock }}</span>
+                            {% else %}
+                                <span class="badge-stock bg-stock-empty">0</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if producto.stock > 0 %}
+                                <form method="POST" action="{% url 'vender_producto' producto.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-vender btn-sm">Vender</button>
+                                </form>
+                            {% else %}
+                                <span class="badge bg-dark">Sin stock</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-secondary py-4">No hay productos registrados</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-<table class="table table-dark table-striped mt-3">
-<thead>
-<tr>
-<th>Producto</th>
-<th>Precio</th>
-<th>Stock</th>
-<th>Venta</th>
-</tr>
-</thead>
-<tbody>
-{% for producto in productos %}
-<tr>
-<td>{{ producto.nombre }}</td>
-<td>${{ producto.precio }}</td>
-<td>
-{% if producto.stock > 0 %}
-    <span class="badge-stock bg-stock-ok">{{ producto.stock }}</span>
-{% else %}
-    <span class="badge-stock bg-stock-empty">0</span>
-{% endif %}
-</td>
-<td>
-{% if producto.stock > 0 %}
-<form method="POST" action="{% url 'vender_producto' producto.id %}">
-{% csrf_token %}
-<button class="btn btn-vender btn-sm">Vender</button>
-</form>
-{% else %}
-<span class="badge-stock bg-stock-empty">Sin stock</span>
-{% endif %}
-</td>
-</tr>
-{% empty %}
-<tr>
-<td colspan="4" class="text-center text-secondary">No hay productos registrados</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+        <!-- Combos -->
+        <div>
+            <h3 class="panel-title mb-3">Combos disponibles</h3>
 
-<hr class="mt-5">
+            <div class="row g-4">
+                {% for combo in combos %}
+                <div class="col-md-4">
+                    <div class="combo-card">
+                        <h5 class="mb-2">{{ combo.nombre }}</h5>
+                        <p class="mb-2" style="color:#8cf5a4; font-weight:600;">${{ combo.precio|floatformat:2 }}</p>
+                        <div class="mb-3">
+                            {% for producto in combo.productos.all %}
+                                <span class="badge-producto">{{ producto.nombre }}</span>
+                            {% empty %}
+                                <span class="text-secondary">Sin productos</span>
+                            {% endfor %}
+                        </div>
+                        <form method="POST" action="{% url 'vender_combo' combo.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-vender btn-sm w-100">Vender Combo</button>
+                        </form>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center text-secondary py-4">No hay combos disponibles</div>
+                {% endfor %}
+            </div>
+        </div>
 
-<!-- Combos -->
-<h3 class="mt-4">Combos disponibles</h3>
-
-<div class="row mt-3">
-{% for combo in combos %}
-<div class="col-md-4">
-    <div class="combo-card">
-        <h5>{{ combo.nombre }}</h5>
-        <p style="color:#8cf5a4;font-weight:600;">${{ combo.precio }}</p>
-        <p>
-        {% for producto in combo.productos.all %}
-            <span class="badge-producto">{{ producto.nombre }}</span>
-        {% empty %}
-            <span class="text-secondary">Sin productos</span>
-        {% endfor %}
-        </p>
-        <form method="POST" action="{% url 'vender_combo' combo.id %}">
-            {% csrf_token %}
-            <button class="btn btn-vender btn-sm w-100">Vender Combo</button>
-        </form>
     </div>
-</div>
-{% empty %}
-<div class="col-12 text-center text-secondary">No hay combos disponibles</div>
-{% endfor %}
-</div>
-
-</div>
 </div>
 
 {% endblock %}

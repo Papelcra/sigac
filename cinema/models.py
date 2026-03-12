@@ -280,3 +280,23 @@ class CompraCombo(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} - {self.combo.nombre}"
+    
+
+from django.utils import timezone
+
+class VentaProducto(models.Model):
+
+    producto = models.ForeignKey(
+    Producto,
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True
+)
+    vendedor = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    precio = models.DecimalField(max_digits=8, decimal_places=2)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        if self.producto:
+            return f"{self.producto.nombre} - {self.fecha}"
+        return f"Venta combo - {self.fecha}"
